@@ -26,7 +26,18 @@ init_project() {
 		"${default_dir}/tmp"
 }
 
-while getopts n:t:f:Rih-: flag; do
+# List part types so you don't acciendtly use two slightly different names
+# for the same part type
+list_part_types(){
+	for f in ${default_dir}/symbols/*; do
+		if [[ -d $f ]]; then
+			part_type="${f##*/}"
+			echo "=> $part_type"
+		fi
+	done
+}
+
+while getopts iln:t:f:Rh-: flag; do
 	case "${flag}" in
 		i) 
 			project_parent_dir_check
@@ -34,14 +45,15 @@ while getopts n:t:f:Rih-: flag; do
 			init_project
 			echo "done."
 			exit 0 ;;
+		l) 
+			project_parent_dir_check
+			echo "Currently assigned part names:"
+			list_part_types
+			exit 0 ;;
 		n) cmp_name="${OPTARG}" ;;
 		t) cmp_type="${OPTARG}" ;;
 		f) filename="${OPTARG}" ;;
 		R) refresh=true ;;
-		\?) echo "Invalid option: -"$OPTARG"" >&3
-			exit 1 ;;
-		:) echo "Option -"$OPTARG" requires an argument" >&2
-			exit 1 ;;
 		h) 
 			echo "$package - Handle 3rd-party KiCAD components."
 			echo " "
@@ -56,6 +68,10 @@ while getopts n:t:f:Rih-: flag; do
 			echo "-f	(required)	Filename. Name of file in /tmp directory you want to extract."
 			exit 0
 			;;
+		\?) echo "Invalid option: -"$OPTARG"" >&3
+			exit 1 ;;
+		:) echo "Option -"$OPTARG" requires an argument" >&2
+			exit 1 ;;
 		esac
 	done
 shift "$(( OPTIND - 1 ))"
