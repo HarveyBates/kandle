@@ -47,8 +47,8 @@ your_kicad_project/
 │  │  │  ├─ *.kicad_sym
 │  │  ├─ tmp/
 │  │  │  ├─ *.zip
-├─ fp-info-cache
-├─ sym-info-cache
+├─ fp-info-table
+├─ sym-info-table
 ├─ project.kicad_pcb
 ├─ project.kicad_pro
 ├─ project.kicad_sch
@@ -58,8 +58,15 @@ Download a component from the above supported vendors. Place the `.zip` file in 
 
 ### Step 4
 From your project directory run.
+
+From within the project directory run this command to unpack the .zip file download above into respectivie 
+directories.
 ```bash
-kandle -s <source_name> -t <type_of_your_component> -f <your_download_file_name>.zip -R
+kandle -s <source_name> -t <type_of_your_component> -f <your_download_file_name>.zip
+```
+Then, refresh cached symbol and footprint tables (sym-info-table & fp-info-table)
+```bash
+kandle -R
 ```
 
 ### Step 5
