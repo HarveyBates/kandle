@@ -108,12 +108,11 @@ refresh_tables(){
 	echo ")" >> $fp_cache_file
 }
 
-if $refresh; then
+# Refresh only, no filename means we can exit straight away
+if $refresh && [[ $filename == "" ]]; then
 	echo "Refreshing cached tables..."
 	refresh_tables
-	if [[ $filename == "" ]]; then
-		exit 0
-	fi
+	exit 0
 fi
 
 # Check that component name was supplied
@@ -156,14 +155,7 @@ handle_symbol() {
 	if [[ ! -d "${default_dir}/symbols/${cmp_type}" ]]; then
 		mkdir "${default_dir}/symbols/${cmp_type}"
 	fi
-	cp $1 "${default_dir}/symbols/${cmp_type}/${cmp_name}.kicad_sym"
-}
-
-handle_lib(){
-	if [[ ! -d "${default_dir}/symbols/${cmp_type}" ]]; then
-		mkdir "${default_dir}/symbols/${cmp_type}"
-	fi
-	cp $1 "${default_dir}/symbols/${cmp_type}/${cmp_name}.lib"
+	cp $1 "${default_dir}/symbols/${cmp_type}/${cmp_name}.${2}"
 }
 
 handle_footprint(){
@@ -177,14 +169,16 @@ handle_3d_model(){
 	if [[ ! -d "${default_dir}/3d_models/${cmp_type}" ]]; then
 		mkdir "${default_dir}/3d_models/${cmp_type}"
 	fi
-	cp $1 "${default_dir}/3d_models/${cmp_type}/${cmp_name}.step"
+	cp $1 "${default_dir}/3d_models/${cmp_type}/${cmp_name}.${2}"
 }
 
-# Handles .zip files downloaded from SnapEDA and UltraLibrarian
+# Handles .zip files downloaded from SnapEDA, UltraLibrarian and 
+# ComponentSearchEngine
 # Unzips the .zip file and puts each containing file into their respective 
 # directory. Will handle nested files and directories.
 # See: https://www.snapeda.com/ 
 # See: https://www.ultralibrarian.com/ 
+# See: https://componentsearchengine.com/ 
 recursive_extract() {
 	if [[ ! -d "$output_dir" ]]; then
 		mkdir -p $output_dir
@@ -194,14 +188,11 @@ recursive_extract() {
 	fi
 
 	for f in $(find $output_dir -type f -print); do
-		# Handle schematic symbol
+		# Handle schematic symbol (both .kicad_sym and .lib (legacy))
 		if [[ $f == *.kicad_sym ]]; then
-			handle_symbol $f
-		fi
-
-		# Handle legacy schematic symbols (.lib files)
-		if [[ $f == *.lib ]]; then
-			handle_lib "$f"
+			handle_symbol $f "kicad_sym"
+		elif [[ $f == *.lib ]]; then
+			handle_symbol "$f" "lib"
 		fi
 
 		# Handle footprint
@@ -209,9 +200,11 @@ recursive_extract() {
 			handle_footprint $f
 		fi
 
-		# Handle 3d-model
+		# Handle 3d-model (some models are .stp)
 		if [[ $f == *.step ]]; then
-			handle_3d_model $f
+			handle_3d_model $f "step"
+		elif [[ $f == *.stp ]]; then
+			handle_3d_model $f "stp"
 		fi
 	done
 }
