@@ -66,6 +66,7 @@ while getopts iln:t:f:Rh-: flag; do
 			echo "options:"
 			echo "-h			Show help information."
 			echo "-i	(optional)	Initialise directory structure."
+			echo "-l	(optional)	List installed components and their type."
 			echo "-n	(optional)	Component name. Defaults to filename (without extension)."
 			echo "-R	(optional)	Refresh cached symbol and footprint tables." 
 			echo "-t	(required)	Component type. E.g. op_amp, button etc."
