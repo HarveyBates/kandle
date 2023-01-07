@@ -32,7 +32,12 @@ list_part_types(){
 	for f in ${default_dir}/symbols/*; do
 		if [[ -d $f ]]; then
 			part_type="${f##*/}"
-			echo "=> $part_type"
+			echo "|- $part_type/"
+			for sf in $f/*; do
+				part_name=${sf##*/}
+				part_name="${part_name%.*}"
+				echo "  |- $part_name"
+			done
 		fi
 	done
 }
@@ -47,7 +52,6 @@ while getopts iln:t:f:Rh-: flag; do
 			exit 0 ;;
 		l) 
 			project_parent_dir_check
-			echo "Currently assigned part names:"
 			list_part_types
 			exit 0 ;;
 		n) cmp_name="${OPTARG}" ;;
