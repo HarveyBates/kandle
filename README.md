@@ -5,7 +5,7 @@ Handles external components (parts) that are added to a KiCAD project.
 There are several services that provide 3rd-party symbols, footprints and 3d-models (*Ticks indicate supported systems*).
 
 - [x] [SnapEDA](https://www.snapeda.com/)
-- [ ] [Ultra Librarian](https://www.ultralibrarian.com/)
+- [x] [Ultra Librarian](https://www.ultralibrarian.com/)
 - [ ] [Component Search Engine](https://componentsearchengine.com/library/kicad)
 
 These servcies package their components in different ways making it tiresome to add new components to KiCAD. 
@@ -32,7 +32,7 @@ get an error message
 ### Step 2
 Setup the directory structure.
 ```bash
-kandle -i # Init directory structure
+kandle -i
 ```
 This will result in a directory structure like this:
 ```bash
@@ -63,7 +63,7 @@ From your project directory run.
 From within the project directory run this command to unpack the .zip file download above into respectivie 
 directories.
 ```bash
-kandle -s <source_name> -t <type_of_your_component> -f <your_download_file_name>.zip
+kandle -t <type_of_your_component> -f <your_download_file_name>.zip
 ```
 Then, refresh cached symbol and footprint tables (sym-info-table & fp-info-table)
 ```bash
@@ -71,11 +71,7 @@ kandle -R
 ```
 
 ### Step 5
-To reload the allocation of a new component you need to close your kicad project and reopen it again.
+To refresh the allocation of a new component you need to close your kicad project and reopen it again.
 
-
-
-
-
-
-
+### Step 6
+The component will now be in your symbols and footprint searches. `Extern_` will be appended to the start of each component's name so they are seperate from other components and easy to find.
