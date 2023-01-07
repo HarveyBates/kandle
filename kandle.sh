@@ -7,6 +7,16 @@ cmp_name=""
 filename=""
 refresh=false
 
+# Ensure we are in the right directory before continuing
+# Should be in a directory containing a "*.kicad_pro" file
+project_parent_dir_check() {
+	if [ ! -f *.kicad_pro ]; then
+		echo "No KiCAD project exits in current directory."
+		echo "Ensure you are running this program from within a KiCAD project directory"
+		exit 1
+	fi
+}
+
 # Make directory structure and ignore if already exists
 init_project() {
 	mkdir -p \
@@ -18,7 +28,9 @@ init_project() {
 
 while getopts n:t:f:Rih-: flag; do
 	case "${flag}" in
-		i) echo -n "Building component directories..." 
+		i) 
+			project_parent_dir_check
+			echo -n "Building component directories..." 
 			init_project
 			echo "done."
 			exit 0 ;;
@@ -48,6 +60,10 @@ while getopts n:t:f:Rih-: flag; do
 	done
 shift "$(( OPTIND - 1 ))"
 
+# Assert that we are in the KiCAD project folder 
+project_parent_dir_check
+
+# Initialise directory structure (may not be needed)
 init_project
 
 # Refresh tables (sym-lib-table and fp-lib-table) with components that are found
@@ -138,13 +154,6 @@ fi
 if [[ "$cmp_name" == "" ]]; then
 	cmp_name="${filename%*.*}"
 	echo "Component name not found, using filename as component name: $cmp_name"
-fi
-
-# Assert that we are in the KiCAD project folder 
-if [ ! -f *.kicad_pro ]; then
-	echo "No KiCAD project exits in current directory."
-	echo "Ensure you are running this program from within a KiCAD project directory"
-	exit 1
 fi
 
 # Setup directory paths for later use
