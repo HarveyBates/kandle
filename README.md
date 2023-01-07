@@ -55,6 +55,7 @@ your_kicad_project/
 ```
 ### Step 3
 Download a component from the above supported vendors. Place the `.zip` file in the `components/extern/tmp` directory.
+**Ensure the filename of the `.zip` file matches that of the component.**
 
 ### Step 4
 From your project directory run.
