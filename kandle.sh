@@ -50,6 +50,72 @@ shift "$(( OPTIND - 1 ))"
 
 init_project
 
+# Refresh tables (sym-lib-table and fp-lib-table) with components that are found
+# within the footprint and symbol directories
+refresh_tables(){
+	# This section adds each of the symbols in the symbols dir into the symbol 
+	# cache of KiCAD (sym-lib-table file)
+	symbol_cache_file="sym-lib-table"
+	echo "Writing component symbols to: ${symbol_cache_file}"
+	touch $symbol_cache_file
+	echo "(sym_lib_table" >| $symbol_cache_file
+	for f in ${default_dir}/symbols/*; do
+		if [ -d $f ]; then
+			for sf in $f/*; do
+				# Component (part) name without extension
+				part_name=${sf##*/}
+				extension="${part_name#*.}"
+				part_name="${part_name%.*}"
+
+				# Part type to add to description
+				part_type="${sf%/*}"
+				part_type="${part_type##*/}"
+
+				# Type can either be KiCad or Legacy depending on file 
+				# extension (ul is mostly .lib as far as I can see)
+				lib_type="KiCad"
+				if [[ $extension == "lib" ]]; then
+					lib_type="Legacy"
+				fi
+
+				sym_cache="(lib (name \"Extern_${part_type}_${part_name}\")(type \"${lib_type}\")(uri \"\${KIPRJMOD}/${sf}\")(options \"\")(descr \"${part_type}\"))"
+
+				echo $sym_cache >> $symbol_cache_file
+				echo "Processing ${part_name} (${part_type})...done."
+			done
+		fi
+	done
+	echo ")" >> $symbol_cache_file
+
+	# This section adds each of the footprints in the footprints dir into the 
+	# footprint cache of KiCAD (fp-lib-table file)
+	fp_cache_file="fp-lib-table"
+	echo "Writing component symbols to: ${fp_cache_file}"
+	touch $fp_cache_file
+	echo "(fp_lib_table" >| $fp_cache_file
+	for f in ${default_dir}/footprints/*; do
+		if [ -d $f ]; then
+			# Part type to add to description
+			part_type="${f##*/}"
+			part_type="${part_type%.*}"
+			sym_cache="(lib (name \"Extern_${part_type}\")(type \"KiCad\")(uri \"\${KIPRJMOD}/${f}\")(options \"\")(descr \"${part_type}\"))"
+
+			echo $sym_cache >> $fp_cache_file
+
+			echo "Processing ${part_type}...done."
+		fi
+	done
+	echo ")" >> $fp_cache_file
+}
+
+if $refresh; then
+	echo "Refreshing cached tables..."
+	refresh_tables
+	if [[ $filename == "" ]]; then
+		exit 0
+	fi
+fi
+
 # Check that component name was supplied
 if [[ "$cmp_type" == "" ]]; then
 	echo "No component type was supplied. Exiting."
@@ -151,64 +217,6 @@ recursive_extract() {
 }
 
 recursive_extract
-
-# Refresh tables (sym-lib-table and fp-lib-table) with components that are found
-# within the footprint and symbol directories
-refresh_tables(){
-	# This section adds each of the symbols in the symbols dir into the symbol 
-	# cache of KiCAD (sym-lib-table file)
-	symbol_cache_file="sym-lib-table"
-	echo "Writing component symbols to: ${symbol_cache_file}"
-	touch $symbol_cache_file
-	echo "(sym_lib_table" >| $symbol_cache_file
-	for f in ${default_dir}/symbols/*; do
-		if [ -d $f ]; then
-			for sf in $f/*; do
-				# Component (part) name without extension
-				part_name=${sf##*/}
-				extension="${part_name#*.}"
-				part_name="${part_name%.*}"
-
-				# Part type to add to description
-				part_type="${sf%/*}"
-				part_type="${part_type##*/}"
-
-				# Type can either be KiCad or Legacy depending on file 
-				# extension (ul is mostly .lib as far as I can see)
-				lib_type="KiCad"
-				if [[ $extension == "lib" ]]; then
-					lib_type="Legacy"
-				fi
-
-				sym_cache="(lib (name \"Extern_${part_type}_${part_name}\")(type \"${lib_type}\")(uri \"\${KIPRJMOD}/${sf}\")(options \"\")(descr \"${part_type}\"))"
-
-				echo $sym_cache >> $symbol_cache_file
-				echo "Processing ${part_name} (${part_type})...done."
-			done
-		fi
-	done
-	echo ")" >> $symbol_cache_file
-
-	# This section adds each of the footprints in the footprints dir into the 
-	# footprint cache of KiCAD (fp-lib-table file)
-	fp_cache_file="fp-lib-table"
-	echo "Writing component symbols to: ${fp_cache_file}"
-	touch $fp_cache_file
-	echo "(fp_lib_table" >| $fp_cache_file
-	for f in ${default_dir}/footprints/*; do
-		if [ -d $f ]; then
-			# Part type to add to description
-			part_type="${f##*/}"
-			part_type="${part_type%.*}"
-			sym_cache="(lib (name \"Extern_${part_type}\")(type \"KiCad\")(uri \"\${KIPRJMOD}/${f}\")(options \"\")(descr \"${part_type}\"))"
-
-			echo $sym_cache >> $fp_cache_file
-
-			echo "Processing ${part_type}...done."
-		fi
-	done
-	echo ")" >> $fp_cache_file
-}
 
 if $refresh; then
 	echo "Refreshing cached tables..."
