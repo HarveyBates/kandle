@@ -2,15 +2,26 @@
 
 package="kandle"
 
-source_name=""
 default_dir="components/extern"
 cmp_name=""
 filename=""
 refresh=false
 
-while getopts s:n:t:f:Rh-: flag; do
+# Make directory structure and ignore if already exists
+init_project() {
+	mkdir -p \
+		"${default_dir}/3d_models" \
+		"${default_dir}/footprints" \
+		"${default_dir}/symbols" \
+		"${default_dir}/tmp"
+}
+
+while getopts n:t:f:Rih-: flag; do
 	case "${flag}" in
-		s) source_name="${OPTARG}" ;;
+		i) echo -n "Building component directories..." 
+			init_project
+			echo "done."
+			exit 0 ;;
 		n) cmp_name="${OPTARG}" ;;
 		t) cmp_type="${OPTARG}" ;;
 		f) filename="${OPTARG}" ;;
@@ -19,9 +30,25 @@ while getopts s:n:t:f:Rh-: flag; do
 			exit 1 ;;
 		:) echo "Option -"$OPTARG" requires an argument" >&2
 			exit 1 ;;
+		h) 
+			echo "$package - Handle 3rd-party KiCAD components."
+			echo " "
+			echo "$package [options] application [arguements]"
+			echo " "
+			echo "options:"
+			echo "-h			Show help information."
+			echo "-i	(optional)	Initialise directory structure."
+			echo "-n	(optional)	Component name. Defaults to filename (without extension)."
+			echo "-R	(optional)	Refresh cached symbol and footprint tables." 
+			echo "-t	(required)	Component type. E.g. op_amp, button etc."
+			echo "-f	(required)	Filename. Name of file in /tmp directory you want to extract."
+			exit 0
+			;;
 		esac
 	done
 shift "$(( OPTIND - 1 ))"
+
+init_project
 
 # Check that component name was supplied
 if [[ "$cmp_type" == "" ]]; then
@@ -55,22 +82,44 @@ if [ ! -f *.kicad_pro ]; then
 	exit 1
 fi
 
-# Make directory structure and ignore if already exists
-mkdir -p \
-	"${default_dir}/3d_models" \
-	"${default_dir}/footprints" \
-	"${default_dir}/symbols" \
-	"${default_dir}/tmp"
-
 # Setup directory paths for later use
 zip_dir="${default_dir}/tmp/${filename}" # Where the zip file is
 output_dir="${default_dir}/tmp/${cmp_name}" # Where the unziped files will go
 
-# Handles .zip files downloaded from SnapEDA.
+handle_symbol() {
+	if [[ ! -d "${default_dir}/symbols/${cmp_type}" ]]; then
+		mkdir "${default_dir}/symbols/${cmp_type}"
+	fi
+	cp $1 "${default_dir}/symbols/${cmp_type}/${cmp_name}.kicad_sym"
+}
+
+handle_lib(){
+	if [[ ! -d "${default_dir}/symbols/${cmp_type}" ]]; then
+		mkdir "${default_dir}/symbols/${cmp_type}"
+	fi
+	cp $1 "${default_dir}/symbols/${cmp_type}/${cmp_name}.lib"
+}
+
+handle_footprint(){
+	if [[ ! -d "${default_dir}/footprints/${cmp_type}.pretty" ]]; then
+		mkdir "${default_dir}/footprints/${cmp_type}.pretty"
+	fi
+	cp $1 "${default_dir}/footprints/${cmp_type}.pretty/${cmp_name}.kicad_mod"
+}
+
+handle_3d_model(){
+	if [[ ! -d "${default_dir}/3d_models/${cmp_type}" ]]; then
+		mkdir "${default_dir}/3d_models/${cmp_type}"
+	fi
+	cp $1 "${default_dir}/3d_models/${cmp_type}/${cmp_name}.step"
+}
+
+# Handles .zip files downloaded from SnapEDA and UltraLibrarian
 # Unzips the .zip file and puts each containing file into their respective 
-# directory. See: https://www.snapeda.com/ 
-if [[ "$source_name" == "snapeda" ]]; then
-	# Create an output directory and unzip file into there
+# directory. Will handle nested files and directories.
+# See: https://www.snapeda.com/ 
+# See: https://www.ultralibrarian.com/ 
+recursive_extract() {
 	if [[ ! -d "$output_dir" ]]; then
 		mkdir -p $output_dir
 		tar -xvzf $zip_dir -C $output_dir
@@ -78,33 +127,33 @@ if [[ "$source_name" == "snapeda" ]]; then
 		echo "Output directory: $output_dir already exists. Skipping unzip."
 	fi
 
-	for f in ./$output_dir/*.*; do
+	for f in $(find $output_dir -type f -print); do
 		# Handle schematic symbol
 		if [[ $f == *.kicad_sym ]]; then
-			if [[ ! -d "${default_dir}/symbols/${cmp_type}" ]]; then
-				mkdir "${default_dir}/symbols/${cmp_type}"
-			fi
-			cp $f "${default_dir}/symbols/${cmp_type}/${cmp_name}.kicad_sym"
+			handle_symbol $f
+		fi
+
+		# Handle legacy schematic symbols (.lib files)
+		if [[ $f == *.lib ]]; then
+			handle_lib "$f"
 		fi
 
 		# Handle footprint
 		if [[ $f == *.kicad_mod ]]; then
-			if [[ ! -d "${default_dir}/footprints/${cmp_type}.pretty" ]]; then
-				mkdir "${default_dir}/footprints/${cmp_type}.pretty"
-			fi
-			cp $f "${default_dir}/footprints/${cmp_type}.pretty/${cmp_name}.kicad_mod"
+			handle_footprint $f
 		fi
 
 		# Handle 3d-model
 		if [[ $f == *.step ]]; then
-			if [[ ! -d "${default_dir}/3d_models/${cmp_type}" ]]; then
-				mkdir "${default_dir}/3d_models/${cmp_type}"
-			fi
-			cp $f "${default_dir}/3d_models/${cmp_type}/${cmp_name}.step"
+			handle_3d_model $f
 		fi
 	done
-fi
+}
 
+recursive_extract
+
+# Refresh tables (sym-lib-table and fp-lib-table) with components that are found
+# within the footprint and symbol directories
 refresh_tables(){
 	# This section adds each of the symbols in the symbols dir into the symbol 
 	# cache of KiCAD (sym-lib-table file)
@@ -117,12 +166,22 @@ refresh_tables(){
 			for sf in $f/*; do
 				# Component (part) name without extension
 				part_name=${sf##*/}
-				part_name="${part_name%.kicad_sym}"
+				extension="${part_name#*.}"
+				part_name="${part_name%.*}"
 
 				# Part type to add to description
 				part_type="${sf%/*}"
 				part_type="${part_type##*/}"
-				sym_cache="(lib (name \"Extern_${part_type}_${part_name}\")(type \"KiCad\")(uri \"\${KIPRJMOD}/${sf}\")(options \"\")(descr \"${part_type}\"))"
+
+				# Type can either be KiCad or Legacy depending on file 
+				# extension (ul is mostly .lib as far as I can see)
+				lib_type="KiCad"
+				if [[ $extension == "lib" ]]; then
+					lib_type="Legacy"
+				fi
+
+				sym_cache="(lib (name \"Extern_${part_type}_${part_name}\")(type \"${lib_type}\")(uri \"\${KIPRJMOD}/${sf}\")(options \"\")(descr \"${part_type}\"))"
+
 				echo $sym_cache >> $symbol_cache_file
 				echo "Processing ${part_name} (${part_type})...done."
 			done
@@ -152,9 +211,8 @@ refresh_tables(){
 }
 
 if $refresh; then
-	echo "Refreshing cached tables."
+	echo "Refreshing cached tables..."
 	refresh_tables
+	exit 0
 fi
-
-echo "Complete."
 
