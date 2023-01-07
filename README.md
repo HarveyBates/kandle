@@ -6,7 +6,7 @@ There are several services that provide 3rd-party symbols, footprints and 3d-mod
 
 - [x] [SnapEDA](https://www.snapeda.com/)
 - [x] [Ultra Librarian](https://www.ultralibrarian.com/)
-- [ ] [Component Search Engine](https://componentsearchengine.com/library/kicad)
+- [x] [Component Search Engine](https://componentsearchengine.com/library/kicad)
 
 These servcies package their components in different ways making it tiresome to add new components to KiCAD. 
 This program uses a set file structure to automatically add new components (symbols, footprints and 3d-models) to your project.
