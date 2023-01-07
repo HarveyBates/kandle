@@ -26,8 +26,8 @@ that you use it in an existing project as it requires a specific directory struc
 footprint links.
 
 ### Step 1
-In your terminal naviage to your project. You want to be in the same directory as your `.kicad_pro` file. If not you will 
-get an error message
+In your terminal naviage to your KiCAD project. You want to be in the same directory as your `.kicad_pro` file. If not you will 
+get an error message.
 
 ### Step 2
 Setup the directory structure.
@@ -69,9 +69,23 @@ Then, refresh cached symbol and footprint tables (sym-info-table & fp-info-table
 ```bash
 kandle -R
 ```
-
 ### Step 5
 To refresh the allocation of a new component you need to close your kicad project and reopen it again.
 
 ### Step 6
 The component will now be in your symbols and footprint searches. `Extern_` will be appended to the start of each component's name so they are seperate from other components and easy to find.
+
+## Help
+```bash
+kandle - Handle 3rd-party KiCAD components.
+ 
+kandle [options] application [arguements]
+ 
+options:
+-h                      Show help information.
+-i      (optional)      Initialise directory structure.
+-n      (optional)      Component name. Defaults to filename (without extension).
+-R      (optional)      Refresh cached symbol and footprint tables.
+-t      (required)      Component type. E.g. op_amp, button etc.
+-f      (required)      Filename. Name of file in /tmp directory you want to extract.
+```
