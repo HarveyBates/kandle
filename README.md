@@ -69,6 +69,22 @@ Then, refresh cached symbol and footprint tables (sym-info-table & fp-info-table
 ```bash
 kandle -R
 ```
+You can check the allocation of your new component by:
+```bash
+kandle -l
+```
+Which will output something like this depending on your installed 3rd-party components:
+```bash
+|- battery_holder/
+  |- 1043
+  |- 1048P
+|- op_amp/
+  |- LM358
+  |- LM359M
+|- regulator/
+  |- LM350T
+```
+
 ### Step 5
 To refresh the allocation of a new component you need to close your kicad project and reopen it again.
 
