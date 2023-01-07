@@ -100,6 +100,7 @@ kandle [options] application [arguements]
 options:
 -h                      Show help information.
 -i      (optional)      Initialise directory structure.
+-l      (optional)      List installed components and their type.
 -n      (optional)      Component name. Defaults to filename (without extension).
 -R      (optional)      Refresh cached symbol and footprint tables.
 -t      (required)      Component type. E.g. op_amp, button etc.
