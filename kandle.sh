@@ -7,12 +7,15 @@ cmp_name=""
 filename=""
 refresh=false
 
+bold=$(tput bold)
+normal=$(tput sgr0)
+
 # Ensure we are in the right directory before continuing
 # Should be in a directory containing a "*.kicad_pro" file
 project_parent_dir_check() {
 	if [ ! -f *.kicad_pro ]; then
 		echo "No KiCAD project exits in current directory."
-		echo "Ensure you are running this program from within a KiCAD project directory"
+		echo "Ensure you are running this program from within a KiCAD project directory."
 		exit 1
 	fi
 }
@@ -32,7 +35,7 @@ list_part_types(){
 	for f in ${default_dir}/symbols/*; do
 		if [[ -d $f ]]; then
 			part_type="${f##*/}"
-			echo "|- $part_type/"
+			echo "|- ${bold}$part_type${normal}/"
 			for sf in $f/*; do
 				part_name=${sf##*/}
 				part_name="${part_name%.*}"
@@ -185,6 +188,22 @@ handle_symbol() {
 	if [[ ! -d "${default_dir}/symbols/${cmp_type}" ]]; then
 		mkdir "${default_dir}/symbols/${cmp_type}"
 	fi
+
+	footprint_name="";
+	for f in $(find $output_dir -type f -print); do
+		if [[ $f == *.kicad_mod ]]; then
+			footprint_name=${f##*/}
+			footprint_name="${footprint_name%.*}"
+			sed -i '' "s/${footprint_name}/Extern_${cmp_type}:${cmp_name}/g" \
+				"$output_dir/$cmp_name.${2}"
+			echo "Footprint for \"${cmp_name}\" automatically assigned."
+		fi
+	done
+
+	if [[ $footprint_name == "" ]]; then
+		echo "Footprint for \"${cmp_name}\" could not be automatically assigned."
+	fi
+
 	cp $1 "${default_dir}/symbols/${cmp_type}/${cmp_name}.${2}"
 }
 
