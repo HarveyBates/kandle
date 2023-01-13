@@ -10,6 +10,9 @@ It supports files downloaded from several vendors such as:
 
 The CLI will automatically extract, rename, and link these components to your project. So all you have to do is place on your schematic or PCB.
 
+## See it in action [here](https://www.youtube.com/watch?v=N1Pj9GHJTcU/&t=610s)
+[![Video](https://img.youtube.com/vi/N1Pj9GHJTcU/mqdefault.jpg)](https://www.youtube.com/watch?v=N1Pj9GHJTcU/&t=610s)
+
 ## Installation
 Download repository
 ```bash
