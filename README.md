@@ -1,15 +1,14 @@
 # Kandle (KiCAD Component Handler)
 ## What is it?
-Handles external components (parts) that are added to a KiCAD project. 
 
-There are several services that provide 3rd-party symbols, footprints and 3d-models (*Ticks indicate supported systems*).
+A CLI that automatically imports external components into a KiCad project.
 
+It supports files downloaded from several vendors such as:
 - [x] [SnapEDA](https://www.snapeda.com/)
 - [x] [Ultra Librarian](https://www.ultralibrarian.com/)
 - [x] [Component Search Engine](https://componentsearchengine.com/library/kicad)
 
-These servcies package their components in different ways making it tiresome to add new components to KiCAD. 
-This program uses a set file structure to automatically add new components (symbols, footprints and 3d-models) to your project.
+The CLI will automatically extract, rename, and link these components to your project. So all you have to do is place on your schematic or PCB.
 
 ## Installation
 Download repository
@@ -30,23 +29,19 @@ In your terminal naviage to your KiCAD project. You want to be in the same direc
 get an error message.
 
 ### Step 2
-Setup the directory structure.
+Setup (initialise) the directory structure.
 ```bash
 kandle -i
 ```
 This will result in a directory structure like this:
-```bash
+```
 your_kicad_project/
 ├─ components/
 │  ├─ extern/
 │  │  ├─ 3d_models/
-│  │  │  ├─ *.step
 │  │  ├─ footprints/
-│  │  │  ├─ *.pretty/
 │  │  ├─ symbols/
-│  │  │  ├─ *.kicad_sym
-│  │  ├─ tmp/
-│  │  │  ├─ *.zip
+│  │  ├─ tmp/ <--- downloaded .zip files go here
 ├─ fp-info-table
 ├─ sym-info-table
 ├─ project.kicad_pcb
@@ -74,7 +69,7 @@ You can check the allocation of your new component by:
 kandle -l
 ```
 Which will output something like this depending on your installed 3rd-party components:
-```bash
+```
 |- battery_holder/
   |- 1043
   |- 1048P
@@ -86,13 +81,13 @@ Which will output something like this depending on your installed 3rd-party comp
 ```
 
 ### Step 5
-To refresh the allocation of a new component you need to close your kicad project and reopen it again.
+To refresh your project components you need to close your kicad project and open it again.
 
 ### Step 6
-The component will now be in your symbols and footprint searches. `Extern_` will be appended to the start of each component's name so they are seperate from other components and easy to find.
+The component will now be in your symbols and footprint searches. `Extern_` will be appended to the start of each component's name so they are seperate from other components and easy to find. The component symbol and footprint will be automatically linked to eachother.
 
 ## Help
-```bash
+```
 kandle - Handle 3rd-party KiCAD components.
  
 kandle [options] application [arguements]
