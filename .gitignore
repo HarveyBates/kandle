@@ -4,17 +4,17 @@
 *.*.swp
 
 # Test project files
-test/test_project/test_project-backups/
-test/test_project/components/extern/3d_models/
-test/test_project/components/extern/footprints/
-test/test_project/components/extern/symbols/
-*.kicad_prl
-
 # Components from 3rd-party providers
-# Only want zip files in certain directories
-!*.zip
+test/test_project/components/extern/3d_models
+test/test_project/components/extern/footprints
+test/test_project/components/extern/symbols
+test/test_project/components/extern/tmp/*
 !test/test_project/components/extern/tmp/SnapEDA
-test/test_project/components/extern/tmp/
+!test/test_project/components/extern/tmp/SnapEDA/**/*.zip
+
+# KiCad directories and files
+test/test_project/test_project-backups/
+*.kicad_prl
 
 # Bats-core directories (tests)
 /test/bats
