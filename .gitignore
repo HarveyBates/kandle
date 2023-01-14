@@ -1,1 +1,13 @@
 .DS_Store
+
+# Test project files
+test/test_project/test_project-backups
+test/test_project/components/extern/3d_models
+test/test_project/components/extern/footprints
+test/test_project/components/extern/symbols
+*.kicad_prl
+
+
+# Bats-core directories (tests)
+/test/bats
+/test/test_helper
