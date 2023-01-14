@@ -118,7 +118,7 @@ refresh_tables(){
 					lib_type="Legacy"
 				fi
 
-				sym_cache="(lib (name \"Extern_${part_type}_${part_name}\")(type \"${lib_type}\")(uri \"\${KIPRJMOD}/${sf}\")(options \"\")(descr \"${part_type}\"))"
+				sym_cache="(lib (name \"Extern_${part_type}\")(type \"${lib_type}\")(uri \"\${KIPRJMOD}/${sf}\")(options \"\")(descr \"${part_type}\"))"
 
 				echo $sym_cache >> $symbol_cache_file
 				echo "Processing ${part_name} (${part_type})...done."
@@ -157,8 +157,14 @@ fi
 
 # Check that component name was supplied
 if [[ "$cmp_type" == "" ]]; then
-	echo "No component type was supplied. Exiting."
-	exit 1
+	read -p "No component type was supplied." \ 
+		"Do you what to use the default type of Unknown? (y/n)." answer
+	if [ "$answer" == "y" ]; then
+		$cmp_type="Unknown"
+	else
+		echo "Exiting..."
+		exit 1
+	fi
 fi
 
 # Check that filename was supplied
@@ -177,7 +183,7 @@ fi
 # Check that component type was supplied, use filename otherwise
 if [[ "$cmp_name" == "" ]]; then
 	cmp_name="${filename%*.*}"
-	echo "Component name not found, using filename as component name: $cmp_name"
+	echo "Component name not provided, using filename as component name: $cmp_name"
 fi
 
 # Setup directory paths for later use
@@ -194,9 +200,17 @@ handle_symbol() {
 		if [[ $f == *.kicad_mod ]]; then
 			footprint_name=${f##*/}
 			footprint_name="${footprint_name%.*}"
-			sed -i '' "s/${footprint_name}/Extern_${cmp_type}:${cmp_name}/g" \
-				"$output_dir/$cmp_name.${2}"
-			echo "Footprint for \"${cmp_name}\" automatically assigned."
+			# TODO at the moment replacing the footprint name when the cmp_name 
+			# is the same results in bad filenames. Current work around is just 
+			# to rename if they are different.
+			if [[ $footprint_name != $cmp_name ]]; then
+				sed -i '' "s/${footprint_name}/Extern_${cmp_type}:${cmp_name}/g" "$1"
+				echo "Footprint for \"${cmp_name}\" automatically linked to symbol."
+				break
+			else
+				echo "Footprint for \"${cmp_name}\" could not be linked to symbol."
+				break
+			fi
 		fi
 	done
 
@@ -221,6 +235,10 @@ handle_3d_model(){
 	cp $1 "${default_dir}/3d_models/${cmp_type}/${cmp_name}.${2}"
 }
 
+symbol=false
+footprint=false
+model=false
+
 # Handles .zip files downloaded from SnapEDA, UltraLibrarian and 
 # ComponentSearchEngine
 # Unzips the .zip file and puts each containing file into their respective 
@@ -230,35 +248,84 @@ handle_3d_model(){
 # See: https://componentsearchengine.com/ 
 recursive_extract() {
 	if [[ ! -d "$output_dir" ]]; then
-		mkdir -p $output_dir
-		tar -xvzf $zip_dir -C $output_dir
+		mkdir -p "$output_dir"
+		tar -xvzf "$zip_dir" -C "$output_dir" > /dev/null 2>&1
 	else
 		echo "Output directory: $output_dir already exists. Skipping unzip."
 	fi
 
-	for f in $(find $output_dir -type f -print); do
+	# For CSE only, just needs to look in the KiCad folder first
+	# as it provides directories from all different providers with
+	# conflicting filetypes
+	OIFS="$IFS"
+	IFS=$'\n'
+	for f in $(find "$output_dir" -type "d" -print); do
+		if [[ $f == $output_dir/*/KiCad ]]; then
+			echo "Detected ComponentSearchEngine part."
+			search_in_dir "$f"
+			break
+		fi
+	done
+	IFS="$OIFS"
+
+	search_in_dir "$output_dir"
+}
+
+search_in_dir(){
+	# Handle spaces in filenamename
+	OIFS="$IFS"
+	IFS=$'\n'
+	for f in $(find $1 -type "f" -print); do
+
 		# Handle schematic symbol (both .kicad_sym and .lib (legacy))
-		if [[ $f == *.kicad_sym ]]; then
-			handle_symbol $f "kicad_sym"
-		elif [[ $f == *.lib ]]; then
+		if [[ $f == *.kicad_sym && "$symbol" == false ]]; then
+			symbol=true
+			handle_symbol "$f" "kicad_sym"
+		fi
+
+		# Old symbol version
+		if [[ $f == *.lib && "$symbol" == false ]]; then
+			symbol=true
 			handle_symbol "$f" "lib"
 		fi
 
 		# Handle footprint
-		if [[ $f == *.kicad_mod ]]; then
-			handle_footprint $f
+		if [[ "$f" == *.kicad_mod && "$footprint" == false ]]; then
+			footprint=true
+			handle_footprint "$f"
 		fi
 
 		# Handle 3d-model (some models are .stp)
-		if [[ $f == *.step ]]; then
-			handle_3d_model $f "step"
-		elif [[ $f == *.stp ]]; then
-			handle_3d_model $f "stp"
+		if [[ $f == *.step && "$model" == false ]]; then
+			model=true
+			handle_3d_model "$f" "step"
+		elif [[ $f == *.stp && "$model" == false ]]; then
+			model=true
+			handle_3d_model "$f" "stp"
 		fi
 	done
+	IFS="$OIFS"
 }
 
 recursive_extract
+
+if [[ "$symbol" == false ]]; then
+	echo "${bold}Error${normal}, no schematic symbol found for component: $cmp_name"
+else
+	echo "Symbol -> found."
+fi
+
+if [[ "$footprint" == false ]]; then
+	echo "${bold}Error${normal}, no PCB footprint found for component: $cmp_name"
+else
+	echo "Footprint -> found."
+fi
+
+if [[ "$model" == false ]]; then
+	echo "${bold}Error${normal}, no 3D model found for component: $cmp_name"
+else
+	echo "3D-model -> found."
+fi
 
 if $refresh; then
 	echo "Refreshing cached tables..."
