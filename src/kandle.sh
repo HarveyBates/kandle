@@ -14,8 +14,7 @@ normal=$(tput sgr0)
 # Should be in a directory containing a "*.kicad_pro" file
 project_parent_dir_check() {
 	if [ ! -f *.kicad_pro ]; then
-		echo "No KiCAD project exits in current directory."
-		echo "Ensure you are running this program from within a KiCAD project directory."
+		echo "No KiCad project exists in current directory."
 		exit 1
 	fi
 }

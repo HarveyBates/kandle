@@ -1,4 +1,7 @@
+# User defined files and directories
 .DS_Store
+*.swp
+*.*.swp
 
 # Test project files
 test/test_project/test_project-backups
@@ -7,6 +10,10 @@ test/test_project/components/extern/footprints
 test/test_project/components/extern/symbols
 *.kicad_prl
 
+# Components from 3rd-party providers
+# Only want zip files in certain directories
+test/test_project/components/extern/tmp/
+!test/test_project/components/extern/tmp/SnapEDA
 
 # Bats-core directories (tests)
 /test/bats
