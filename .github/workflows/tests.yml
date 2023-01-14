@@ -1,0 +1,34 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Startup Update and Upgrade
+      run: |
+        sudo apt-get update
+        sudo apt-get upgrade
+    
+    - name: Install BATS Submodules
+      run: |
+        git submodule add https://github.com/bats-core/bats-core.git test/bats
+        git submodule add https://github.com/bats-core/bats-support.git test/test_helper/bats-support
+        git submodule add https://github.com/bats-core/bats-assert.git test/test_helper/bats-assert
+      
+    - name: Run Test Suite
+      run: |
+        cd test/test_project
+        ./../bats/bin/bats ./../test.bats
