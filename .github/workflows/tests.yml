@@ -21,12 +21,16 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get upgrade
+        
+    - name: Change permissions on Kandle
+      run: |
+        chmod a+x src/kandle.sh
     
     - name: Install BATS Submodules
       run: |
-        git submodule add https://github.com/bats-core/bats-core.git test/bats
-        git submodule add https://github.com/bats-core/bats-support.git test/test_helper/bats-support
-        git submodule add https://github.com/bats-core/bats-assert.git test/test_helper/bats-assert
+        git clone https://github.com/bats-core/bats-core.git test/bats
+        git clone https://github.com/bats-core/bats-support.git test/test_helper/bats-support
+        git clone https://github.com/bats-core/bats-assert.git test/test_helper/bats-assert
       
     - name: Run Test Suite
       run: |
