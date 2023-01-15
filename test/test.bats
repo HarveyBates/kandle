@@ -1,4 +1,7 @@
 setup() {
+	load 'test_helper/bats-support/load'
+    load 'test_helper/bats-assert/load'
+
     DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
     PATH="$DIR/../src:$PATH"
 }
@@ -14,11 +17,18 @@ setup() {
 	[ -d components/extern/tmp ] # Should always exist anyways for tests
 }
 
-# Ensure that the CLI only works within a KiCad project directory
-@test "Check working directory" {
+# Ensure that the CLI works within a KiCad project directory
+@test "Check commands can be run inside KiCad working directory" {
+	run kandle.sh -i
+	assert_success
+}
+
+# Ensure that the CLI doesn't work outside KiCad project directory
+@test "Check commands cannot be run outside of working directory" {
 	cd ../
 	run kandle.sh -i
-	[ "$output" = 'No KiCad project exists in current directory.' ]
+	assert_output 'No KiCad project exists in current directory.'
+	assert_failure
 }
 
 # Test extractions from SnapEDA for KiCad v6.0
