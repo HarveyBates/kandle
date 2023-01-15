@@ -10,7 +10,7 @@ test/test_project/components/extern/footprints
 test/test_project/components/extern/symbols
 test/test_project/components/extern/tmp/*
 !test/test_project/components/extern/tmp/SnapEDA
-!test/test_project/components/extern/tmp/SnapEDA/**/*.zip
+!test/test_project/components/extern/tmp/UltraLibrarian
 
 # KiCad directories and files
 test/test_project/test_project-backups/
