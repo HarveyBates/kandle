@@ -69,7 +69,7 @@ assert_kicad_symbol_v6() {
 	[ -f components/extern/3d_models/op_amp/OPA2209AID.step ]
 	[ -f components/extern/footprints/op_amp.pretty/OPA2209AID.kicad_mod ]
 	[ -f components/extern/symbols/op_amp/OPA2209AID.kicad_sym ]
-	assert_kicad_symbol_v6 "components/extern/symbols/photodiode/SFH2400_Z.kicad_sym"
+	assert_kicad_symbol_v6 "components/extern/symbols/op_amp/OPA2209AID.kicad_sym"
 
 	# Photodiode SFH_2400_Z 
 	run kandle.sh -t photodiode -n SFH2400_Z -f SnapEDA/kicad_v6/SFH_2400_Z.zip

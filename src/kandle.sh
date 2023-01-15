@@ -262,7 +262,6 @@ recursive_extract() {
 	OIFS="$IFS"
 	IFS=$'\n'
 	for f in $(find "$output_dir" -type "d" -print); do
-		echo $f
 		if [[ $f == $output_dir/*/KiCad ]]; then
 			echo "Detected ComponentSearchEngine part."
 			search_in_dir "$f"
