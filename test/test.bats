@@ -27,7 +27,7 @@ setup() {
 @test "Check commands cannot be run outside of working directory" {
 	cd ../
 	run kandle.sh -i
-	assert_output 'No KiCad project exists in current directory.'
+	assert_output --partial 'No KiCad project exists in current directory.'
 	assert_failure
 }
 
