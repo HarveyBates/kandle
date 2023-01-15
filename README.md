@@ -19,18 +19,19 @@ Download repository
 ```bash
 git clone https://github.com/HarveyBates/kicad-component-handler
 cd kicad-component-handler
+chmod a+x src/kandle.sh # Modify permissions to make the script executable
+export PATH=$PATH:$PWD/src # Add the script to your PATH (this allows you to run it from any directory)
 ```
-Add kandle.sh to you path, in you shell scripts somewhere.
+If you want to permanently add the script to your path here is a [tutorial](https://appuals.com/how-to-make-a-program-executable-from-everywhere-in-linux/).
 
 ## Usage
 >**Warning** 
->This project currently overwrites your cached symbol and footprint tables (only project specific), it is not reccomended 
+>This project currently overwrites your cached symbol and footprint tables (only project specific), it is not recommended 
 that you use it in an existing project as it requires a specific directory structure and may mess up your symbol and 
 footprint links.
 
 ### Step 1
-In your terminal naviage to your KiCAD project. You want to be in the same directory as your `.kicad_pro` file. If not you will 
-get an error message.
+In your terminal navigae to your KiCAD project. You want to be in the same directory as your `.kicad_pro` file. If not you will get an error message saying "*No KiCad project exists in current directory.*".
 
 ### Step 2
 Setup (initialise) the directory structure.
@@ -53,17 +54,24 @@ your_kicad_project/
 ├─ project.kicad_sch
 ```
 ### Step 3
-Download a component from the above supported vendors. Place the `.zip` file in the `components/extern/tmp` directory.
-**Ensure the filename of the `.zip` file matches that of the component.**
+Download a component from the above supported vendors. Place the `.zip` file in the `components/extern/tmp` directory. It's your choice, but its good idea to rename the `.zip` file with the component name and underscores instead of spaces or dashes.
+
+>**Example:**
+>If the filename is `PESD 0402-140.zip` rename it to `PESD_0402_140.zip`. This will allow you to skip renaming it later and I think its more robust to not have spaces in filenames.
 
 ### Step 4
 From your project directory run.
 
-From within the project directory run this command to unpack the .zip file download above into respectivie 
-directories.
+From within the project directory run this command to unpack the .zip file download above into respective 
+directories. This will use the filename as the component name.
 ```bash
 kandle -t <type_of_your_component> -f <your_download_file_name>.zip
 ```
+**Or**, you can specify the part name using the command (if you didn't change the filename above):
+```bash
+kandle -t <type_of_your_component> -n <name_of_your_component> -f <your_download_file_name>.zip
+```
+### Step 5
 Then, refresh cached symbol and footprint tables (sym-info-table & fp-info-table)
 ```bash
 kandle -R
@@ -84,17 +92,17 @@ Which will output something like this depending on your installed 3rd-party comp
   |- LM350T
 ```
 
-### Step 5
-To refresh your project components you need to close your kicad project and open it again.
-
 ### Step 6
-The component will now be in your symbols and footprint searches. `Extern_` will be appended to the start of each component's name so they are seperate from other components and easy to find. The component symbol and footprint will be automatically linked to eachother.
+To refresh your project components you need to close your KiCad project and open it again.
+
+### Step 7
+The component will now be in your symbols and footprint searches. `Extern_` will be appended to the start of each component's name so they are seperate from other components and easy to find. The component symbol and footprint will be automatically linked to each other.
 
 ## Help
 ```
 kandle - Handle 3rd-party KiCAD components.
  
-kandle [options] application [arguements]
+kandle [options] application [arguments]
  
 options:
 -h                      Show help information.
@@ -105,3 +113,12 @@ options:
 -t      (required)      Component type. E.g. op_amp, button etc.
 -f      (required)      Filename. Name of file in /tmp directory you want to extract.
 ```
+
+## Found a problem 
+Submit an [issue](https://github.com/HarveyBates/kicad-component-handler/issues) with:
+1. A link to the component (if the issue is related to a component you are trying to import).
+2. A description of the issue that you are facing.
+
+## License
+This project is MIT licensed, as found in the LICENCE file.
+
