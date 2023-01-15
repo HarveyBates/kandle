@@ -63,7 +63,7 @@ while getopts iln:t:f:Rh-: flag; do
 		h) 
 			echo "$package - Handle 3rd-party KiCAD components."
 			echo " "
-			echo "$package [options] application [arguements]"
+			echo "$package [options] application [arguments]"
 			echo " "
 			echo "options:"
 			echo "-h			Show help information."
