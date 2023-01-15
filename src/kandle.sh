@@ -248,7 +248,7 @@ model=false
 recursive_extract() {
 	if [[ ! -d "$output_dir" ]]; then
 		mkdir -p "$output_dir"
-		tar -xvzf "$zip_dir" -C "$output_dir" > /dev/null 2>&1
+		unzip "$zip_dir" -d "$output_dir/$cmp_name" > /dev/null 2>&1
 	else
 		echo "Output directory: $output_dir already exists. Skipping unzip."
 	fi
