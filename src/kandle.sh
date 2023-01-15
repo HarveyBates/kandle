@@ -248,7 +248,10 @@ model=false
 recursive_extract() {
 	if [[ ! -d "$output_dir" ]]; then
 		mkdir -p "$output_dir"
-		unzip "$zip_dir" -d "$output_dir/$cmp_name" > /dev/null 2>&1
+		if ! unzip "$zip_dir" -d "$output_dir/$cmp_name" > /dev/null 2>&1 ; then
+			echo "Unable to extract from: $zip_dir"
+			exit 1
+		fi
 	else
 		echo "Output directory: $output_dir already exists. Skipping unzip."
 	fi
@@ -259,6 +262,7 @@ recursive_extract() {
 	OIFS="$IFS"
 	IFS=$'\n'
 	for f in $(find "$output_dir" -type "d" -print); do
+		echo $f
 		if [[ $f == $output_dir/*/KiCad ]]; then
 			echo "Detected ComponentSearchEngine part."
 			search_in_dir "$f"
@@ -271,7 +275,7 @@ recursive_extract() {
 }
 
 search_in_dir(){
-	# Handle spaces in filenamename
+	# Handle spaces in filename
 	OIFS="$IFS"
 	IFS=$'\n'
 	for f in $(find $1 -type "f" -print); do
