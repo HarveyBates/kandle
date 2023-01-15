@@ -26,9 +26,8 @@ If you want to permanently add the script to your path here is a [tutorial](http
 
 ## Usage
 >**Warning** 
->This project currently overwrites your cached symbol and footprint tables (only project specific), it is not recommended 
-that you use it in an existing project as it requires a specific directory structure and may mess up your symbol and 
-footprint links.
+>This project currently overwrites your cached 3rd-party symbol and footprint tables (only project specific). If you have an existing project that has 
+third party components you will need to migrate to Kandle's directory structure before running `kandle.sh -R`.
 
 ### Step 1
 In your terminal navigae to your KiCAD project. You want to be in the same directory as your `.kicad_pro` file. If not you will get an error message saying "*No KiCad project exists in current directory.*".
