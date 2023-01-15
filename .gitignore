@@ -11,6 +11,7 @@ test/test_project/components/extern/symbols
 test/test_project/components/extern/tmp/*
 !test/test_project/components/extern/tmp/SnapEDA
 !test/test_project/components/extern/tmp/UltraLibrarian
+!test/test_project/components/extern/tmp/ComponentSearchEngine
 
 # KiCad directories and files
 test/test_project/test_project-backups/

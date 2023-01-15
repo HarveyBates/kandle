@@ -126,7 +126,7 @@ assert_kicad_symbol_v6() {
 # Test extractions from UltraLibrarian (components are KiCad v4.0)
 # All components have all symbols, footprints and 3D-models
 # https://www.ultralibrarian.com/ 
-@test "Extract and rename from UltraLibrarian (only provides KiCad v4.0 components)" {
+@test "Extract and rename from UltraLibrarian (KiCad v4.0)" {
 
 	run kandle.sh -i
 
@@ -163,3 +163,43 @@ assert_kicad_symbol_v6() {
 	assert_kicad_symbol_v4 "components/extern/symbols/mosfet_p_channel/SSM3J340R_LF.lib"
 }
 
+# Test extractions from ComponentSearchEngine (components are KiCad v4.0)
+# All components have all symbols, footprints and 3D-models
+# https://componentsearchengine.com/ 
+@test "Extract and rename from ComponentSearchEngine (KiCad v4.0)" {
+
+	run kandle.sh -i
+
+	# Fuse 0685P2000-01
+	run kandle.sh -t fuse -n 0685P2000_01 -f ComponentSearchEngine/0685P2000-01.zip
+	assert_success
+	[ -f components/extern/3d_models/fuse/0685P2000_01.stp ]
+	[ -f components/extern/footprints/fuse.pretty/0685P2000_01.kicad_mod ]
+	[ -f components/extern/symbols/fuse/0685P2000_01.lib ]
+	assert_kicad_symbol_v4 "components/extern/symbols/fuse/0685P2000_01.lib"
+
+	# Level-shifter 0685P2000-01
+	run kandle.sh -t level_shifter -n NVT2006PW -f ComponentSearchEngine/NVT2006PW.zip
+	assert_success
+	[ -f components/extern/3d_models/level_shifter/NVT2006PW.stp ]
+	[ -f components/extern/footprints/level_shifter.pretty/NVT2006PW.kicad_mod ]
+	[ -f components/extern/symbols/level_shifter/NVT2006PW.lib ]
+	assert_kicad_symbol_v4 "components/extern/symbols/level_shifter/NVT2006PW.lib"
+
+	# Piezo buzzer 0685P2000-01
+	run kandle.sh -t piezo_buzzer -n PS1240P02BT -f ComponentSearchEngine/PS1240P02BT.zip
+	assert_success
+	[ -f components/extern/3d_models/piezo_buzzer/PS1240P02BT.stp ]
+	[ -f components/extern/footprints/piezo_buzzer.pretty/PS1240P02BT.kicad_mod ]
+	[ -f components/extern/symbols/piezo_buzzer/PS1240P02BT.lib ]
+	assert_kicad_symbol_v4 "components/extern/symbols/piezo_buzzer/PS1240P02BT.lib"
+
+	# Load switch 0685P2000-01
+	run kandle.sh -t load_switch -n TPS22967DSGR -f ComponentSearchEngine/TPS22967DSGR.zip
+	assert_success
+	[ -f components/extern/3d_models/load_switch/TPS22967DSGR.stp ]
+	[ -f components/extern/footprints/load_switch.pretty/TPS22967DSGR.kicad_mod ]
+	[ -f components/extern/symbols/load_switch/TPS22967DSGR.lib ]
+	assert_kicad_symbol_v4 "components/extern/symbols/load_switch/TPS22967DSGR.lib"
+
+}
