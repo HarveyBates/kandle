@@ -60,10 +60,8 @@ Download a component from the above supported vendors. Place the `.zip` file in 
 >If the filename is `PESD 0402-140.zip` rename it to `PESD_0402_140.zip`. This will allow you to skip renaming it later and I think its more robust to not have spaces in filenames.
 
 ### Step 4
-From your project directory run.
-
 From within the project directory run this command to unpack the .zip file download above into respective 
-directories. This will use the filename as the component name.
+directories. This will use the filename as the component name. 
 ```bash
 kandle -t <type_of_your_component> -f <your_download_file_name>.zip
 ```
@@ -71,6 +69,9 @@ kandle -t <type_of_your_component> -f <your_download_file_name>.zip
 ```bash
 kandle -t <type_of_your_component> -n <name_of_your_component> -f <your_download_file_name>.zip
 ```
+>**Note:**
+> The current version has a limitation where the depth of component type can only be one level. For example, you can use the component type of `op_amp` but you cant use `op_amp/rail_to_rail`.
+
 ### Step 5
 Then, refresh cached symbol and footprint tables (sym-info-table & fp-info-table)
 ```bash
