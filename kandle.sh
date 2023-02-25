@@ -173,20 +173,21 @@ if [[ "$filename" == "" ]]; then
 fi
 
 # Check that supplied filename exists
-if [ ! -f "${default_dir}/tmp/${filename}" ]; then
-	echo "File: $filename not found in $default_dir/tmp"
+if [ ! -f "${filename}" ]; then
+	echo "File not found in $filename"
 	echo "Exiting"
 	exit 1
 fi
 
 # Check that component type was supplied, use filename otherwise
 if [[ "$cmp_name" == "" ]]; then
-	cmp_name="${filename%*.*}"
+	cmp_name=$(basename "${filename%.*}")
 	echo "Component name not provided, using filename as component name: $cmp_name"
 fi
 
 # Setup directory paths for later use
-zip_dir="${default_dir}/tmp/${filename}" # Where the zip file is
+zip_dir="$filename"
+# zip_dir="${default_dir}/tmp/${filename}" # Where the zip file is
 output_dir="${default_dir}/tmp/${cmp_name}" # Where the unziped files will go
 
 handle_symbol() {
@@ -312,21 +313,21 @@ search_in_dir(){
 recursive_extract
 
 if [[ "$symbol" == false ]]; then
-	echo "${bold}Error${normal}, no schematic symbol found for component: $cmp_name"
+	echo "Symbol -> ${bold}Not found.${normal}"
 else
-	echo "Symbol -> found."
+	echo "Symbol -> Found."
 fi
 
 if [[ "$footprint" == false ]]; then
-	echo "${bold}Error${normal}, no PCB footprint found for component: $cmp_name"
+	echo "Footprint -> ${bold}Not found.${normal}"
 else
-	echo "Footprint -> found."
+	echo "Footprint -> Found."
 fi
 
 if [[ "$model" == false ]]; then
-	echo "${bold}Error${normal}, no 3D model found for component: $cmp_name"
+	echo "3D-model -> ${bold}Not found.${normal}"
 else
-	echo "3D-model -> found."
+	echo "3D-model -> Found."
 fi
 
 if $refresh; then

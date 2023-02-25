@@ -1,7 +1,13 @@
-# User defined files and directories
+# User defined files
 .DS_Store
 *.swp
 *.*.swp
+
+# User defined directories
+build
+cmake-build
+.idea
+files
 
 # Test project files
 # Components from 3rd-party providers
