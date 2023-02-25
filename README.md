@@ -1,7 +1,10 @@
 # Kandle (KiCAD Component Handler)
 ![tests_badge](https://github.com/HarveyBates/kicad-component-handler/actions/workflows/tests.yml/badge.svg)
-## What is it?
 
+>**Warning**
+> Major update coming soon which will dramatically change how this CLI works. Stay tuned...
+
+## What is it?
 A CLI that automatically imports external components into a KiCad project.
 
 It supports files downloaded from several vendors such as:
