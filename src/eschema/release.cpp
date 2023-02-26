@@ -187,7 +187,8 @@ bool Symbol::build_properties(Legacy* legacy_component) {
         pos_y = Utils::mils_to_millimeters(info.pos_y);
 
         // Get font information
-        memcpy(font_buf, build_font(&info), sizeof(font_buf));
+        memcpy(font_buf, build_font(info.font_size,
+                                    info.bold, info.italic), sizeof(font_buf));
         // Get font justification
         memcpy(justify_buf, build_text_justification(&info),
                sizeof(justify_buf));
@@ -230,19 +231,22 @@ bool Symbol::build_properties(Legacy* legacy_component) {
  * @param info
  * @return
  */
-const char* Symbol::build_font(const Component::Information* info) {
-    double font_size = Utils::mils_to_millimeters(info->font_size);
+const char* Symbol::build_font(const int font_size,
+                               const char bold,
+                               const char italic) {
+    double font_size_f = Utils::mils_to_millimeters(font_size);
 
     memset(aux_buffer, 0, sizeof(aux_buffer));
 
-    snprintf(aux_buffer, sizeof(aux_buffer), "(font (size %.2f %.2f)",
-             font_size, font_size);
+    snprintf(aux_buffer, sizeof(aux_buffer), "(font (size %.3f %.3f)",
+             font_size_f, font_size_f);
 
-    if (info->bold == 'B') {
+    if (bold == 'B') {
         strncat(aux_buffer, " bold",
                 sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     }
-    if (info->italic == 'I') {
+
+    if (italic == 'I') {
         strncat(aux_buffer, " italic",
                 sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     }
@@ -327,6 +331,12 @@ bool Symbol::build_graphics(Legacy* legacy_component) {
         }
     }
 
+    // Pins
+    if (!build_pins(legacy_component)) {
+        std::cout << "Error building pins" << std::endl;
+        return false;
+    }
+
     // Closing bracket - end of graphics section
     if (!write_to_file("    )")) {
         return false;
@@ -382,8 +392,8 @@ bool Symbol::build_polygons(const std::vector<Component::Polygon>& polygons) {
                  "          (xy %.3f %.3f)\n"
                  "          (xy %.3f %.3f)\n"
                  "        )\n"
-                 "        (stroke (width %.3f) (type default) color(0 0 0 0))\n"
-                 "        (fill (type %s)\n"
+                 "        (stroke (width %.3f) (type default) (color 0 0 0 0))\n"
+                 "        (fill (type %s))\n"
                  "      )",
                  x0, y0, x1, y1, stroke_width, fill.c_str());
 
@@ -402,9 +412,13 @@ bool Symbol::build_pins(const Legacy* legacy_component) {
     int orientation;
     double length;
     PinShape pin_shape;
+    char font_name_buf[128];
+    char font_num_buf[128];
 
     for (const auto& pin: legacy_component->pins) {
         memset(buffer, 0, sizeof(buffer));
+        memset(font_name_buf, 0, sizeof(font_num_buf));
+        memset(font_num_buf, 0, sizeof(font_num_buf));
 
         pin_type = get_pin_type(pin.electric_type);
         pin_shape = get_pin_shape(pin.shape);
@@ -414,16 +428,24 @@ bool Symbol::build_pins(const Legacy* legacy_component) {
         orientation = get_pin_orientation(pin.orientation);
         length = Utils::mils_to_millimeters(pin.length);
 
-        // TODO add font for pins here
-        // Needs the build_font() method to accept a pin's font
-        // parameters
+        memcpy(font_name_buf, build_font(pin.text_name_size),
+               sizeof(font_name_buf));
+
+        memcpy(font_num_buf, build_font(pin.text_num_size),
+               sizeof(font_num_buf));
+
         snprintf(buffer, sizeof(buffer),
                  "      (pin %s %s (at %.3f %.3f %d) (length %.3f)\n"
-                 "        (name \"%s\" (effects ",
+                 "        (name \"%s\" (effects %s))\n"
+                 "        (number \"%s\" (effects %s))\n"
+                 "      )",
                  pin_type.c_str(), pin_shape.shape.c_str(),
                  pos_x, pos_y, orientation, length, pin.name,
-                 );
+                 font_name_buf, pin.number, font_num_buf);
 
+        if (!write_to_file(buffer)) {
+            return false;
+        }
     }
 
 
@@ -530,17 +552,17 @@ int Symbol::get_pin_orientation(const char identifier) {
 
     switch (identifier) {
         case 'D':
-            angle = 180;
-            break;
-        case 'R':
             angle = 90;
             break;
-        case 'L':
-            angle = 270;
-            break;
-        default:
-        case 'U':
+        case 'R':
             angle = 0;
+            break;
+        case 'L':
+            angle = 180;
+            break;
+        case 'U':
+        default:
+            angle = 270;
     }
 
     return angle;

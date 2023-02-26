@@ -58,7 +58,8 @@ private:
 
     bool build_properties(Legacy* legacy_component);
 
-    const char* build_font(const Component::Information* info);
+    const char* build_font(int font_size, char bold = 'N',
+                           char italic = 'N');
 
     const char* build_text_justification(const Component::Information* info);
 
