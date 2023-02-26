@@ -54,6 +54,20 @@ public:
         char field_name[50]{};
     };
 
+    enum PinElectricalType : char {
+        INPUT = 'I',
+        OUTPUT = 'O',
+        BIDIRECTIONAL = 'B',
+        TRI_STATE = 'T',
+        PASSIVE = 'P',
+        UNSPECIFIED = 'U',
+        POWER_INPUT = 'W',
+        POWER_OUTPUT = 'w',
+        OPEN_COLLECTOR = 'C',
+        OPEN_EMITTER = 'E',
+        NOT_CONNECTED = 'N'
+    };
+
     struct Pin {
         char name[50]{};
         char number[4]{};

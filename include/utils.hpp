@@ -29,15 +29,15 @@
 #include <vector>
 #include <string>
 
-static const char *KICAD_VERSION = "20211014";
-static const char *KICAD_GENERATOR = "kicad_symbol_editor";
+static const char* KICAD_VERSION = "20211014";
+static const char* KICAD_GENERATOR = "kicad_symbol_editor";
 
 class Utils {
 public:
     static std::vector<std::string> readlines(
-            const std::string &filename);
+            const std::string& filename);
 
     static bool assert_true(char c);
 
-    static double mils_to_millimeters(double mils);
+    static double mils_to_millimeters(int mils);
 };

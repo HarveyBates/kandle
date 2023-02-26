@@ -34,7 +34,7 @@
  * @return Vector of strings representing individual lines.
  */
 std::vector<std::string> Utils::readlines(
-        const std::string &filename) {
+        const std::string& filename) {
 
     std::vector<std::string> lines;
     std::ifstream infile(filename, std::ios::in);
@@ -62,7 +62,7 @@ bool Utils::assert_true(const char c) {
     return c == 'Y';
 }
 
-double Utils::mils_to_millimeters(double mils) {
-    return mils * 0.0254;
+double Utils::mils_to_millimeters(int mils) {
+    return (double) mils * 0.0254;
 }
 

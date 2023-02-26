@@ -34,26 +34,45 @@
 
 class Symbol {
     char buffer[512];
-    static const int AUX_BUF_SIZE = 128;
+    static const int AUX_BUF_SIZE = 512;
     char aux_buffer[AUX_BUF_SIZE];
     std::string output_filename;
+
+    struct PinShape {
+        bool visible = false;
+        std::string shape;
+        char identifier;
+    };
 
 public:
     bool new_from_legacy(Legacy* legacy_component, const std::string& filename);
 
+private:
     bool write_to_file(const char* contents);
 
     bool build_header();
 
     bool build_symbol(Legacy* legacy_component);
 
-    const char* build_pins(Legacy* legacy_component);
+    const char* build_pins_definition(Legacy* legacy_component);
 
     bool build_properties(Legacy* legacy_component);
 
     const char* build_font(const Component::Information* info);
 
-    const char* build_justification(const Component::Information* info);
+    const char* build_text_justification(const Component::Information* info);
 
     void add_justification(char identifier);
+
+    bool build_graphics(Legacy* legacy_component);
+
+    bool build_polygons(const std::vector<Component::Polygon>& polygons);
+
+    bool build_pins(const Legacy* legacy_component);
+
+    static PinShape get_pin_shape(const char* shape_buf);
+
+    static std::string get_pin_type(char identifier);
+
+    static int get_pin_orientation(char identifier);
 };

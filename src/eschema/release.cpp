@@ -28,14 +28,21 @@ bool Symbol::new_from_legacy(Legacy* legacy_component,
                              const std::string& filename) {
     output_filename = filename;
 
-    // Each of these methods write to the file (filename)
+    // Each of these methods write to a file (filename)
     if (!build_header()) {
+        std::cout << "Error building symbol header" << std::endl;
         return false;
     }
     if (!build_symbol(legacy_component)) {
+        std::cout << "Error building symbol" << std::endl;
         return false;
     }
     if (!build_properties(legacy_component)) {
+        std::cout << "Error building properties" << std::endl;
+        return false;
+    }
+    if (!build_graphics(legacy_component)) {
+        std::cout << "Error building graphics" << std::endl;
         return false;
     }
 
@@ -99,7 +106,7 @@ bool Symbol::build_symbol(Legacy* legacy_component) {
     char pin_buf[AUX_BUF_SIZE]{};
     memset(buffer, 0, sizeof(buffer));
 
-    memcpy(pin_buf, build_pins(legacy_component), sizeof(pin_buf));
+    memcpy(pin_buf, build_pins_definition(legacy_component), sizeof(pin_buf));
 
     snprintf(buffer, sizeof(buffer),
              "  (symbol \"%s\" %s (in_bom yes) (on_board yes)",
@@ -116,13 +123,14 @@ bool Symbol::build_symbol(Legacy* legacy_component) {
  * @param legacy_component
  * @return
  */
-const char* Symbol::build_pins(Legacy* legacy_component) {
+const char* Symbol::build_pins_definition(Legacy* legacy_component) {
     char buf[40]{};
 
     memset(aux_buffer, 0, sizeof(aux_buffer));
 
     if (!Utils::assert_true(legacy_component->def.show_pin_number)) {
-        strcat(aux_buffer, "(pin_numbers hide) ");
+        strncat(aux_buffer, "(pin_numbers hide) ",
+                sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     }
 
     double offset = Utils::mils_to_millimeters(
@@ -130,10 +138,10 @@ const char* Symbol::build_pins(Legacy* legacy_component) {
 
     if (Utils::assert_true(legacy_component->def.show_pin_name)) {
         snprintf(buf, sizeof(buf), "(pin_names (offset %.3f) show)", offset);
-        strcat(aux_buffer, buf);
+        strncat(aux_buffer, buf, sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     } else {
         snprintf(buf, sizeof(buf), "(pin_names (offset %.3f) hide)", offset);
-        strcat(aux_buffer, buf);
+        strncat(aux_buffer, buf, sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     }
 
     return aux_buffer;
@@ -181,15 +189,20 @@ bool Symbol::build_properties(Legacy* legacy_component) {
         // Get font information
         memcpy(font_buf, build_font(&info), sizeof(font_buf));
         // Get font justification
-        memcpy(justify_buf, build_justification(&info), sizeof(justify_buf));
+        memcpy(justify_buf, build_text_justification(&info),
+               sizeof(justify_buf));
 
         snprintf(buffer, sizeof(buffer),
                  "    (property \"%s\" \"%s\" (id %d) (at %.2f %.2f 0)\n"
                  "      (effects %s %s",
                  key, info.text, i, pos_x, pos_y, font_buf, justify_buf);
 
-        if (info.visibility == 'V') { strcat(buffer, ")\n    )"); }
-        else { strcat(buffer, " hide)\n    )"); }
+        if (info.visibility == 'V') {
+            strncat(buffer, ")\n    )", sizeof(buffer) - strlen(buffer) - 1);
+        } else {
+            strncat(buffer, " hide)\n    )",
+                    sizeof(buffer) - strlen(buffer) - 1);
+        }
 
         if (!write_to_file(buffer)) {
             return false;
@@ -225,9 +238,16 @@ const char* Symbol::build_font(const Component::Information* info) {
     snprintf(aux_buffer, sizeof(aux_buffer), "(font (size %.2f %.2f)",
              font_size, font_size);
 
-    if (info->bold == 'B') { strcat(aux_buffer, " bold"); }
-    if (info->italic == 'I') { strcat(aux_buffer, " italic"); }
-    strcat(aux_buffer, ")");
+    if (info->bold == 'B') {
+        strncat(aux_buffer, " bold",
+                sizeof(aux_buffer) - strlen(aux_buffer) - 1);
+    }
+    if (info->italic == 'I') {
+        strncat(aux_buffer, " italic",
+                sizeof(aux_buffer) - strlen(aux_buffer) - 1);
+    }
+
+    strncat(aux_buffer, ")", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
 
     return aux_buffer;
 }
@@ -241,14 +261,16 @@ const char* Symbol::build_font(const Component::Information* info) {
  * @param info
  * @return
  */
-const char* Symbol::build_justification(const Component::Information* info) {
+const char* Symbol::build_text_justification(
+        const Component::Information* info) {
     memset(aux_buffer, 0, sizeof(aux_buffer));
 
-    strcat(aux_buffer, "(justify ");
+    strncat(aux_buffer, "(justify ",
+            sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     add_justification(info->horz_justification);
-    strcat(aux_buffer, " ");
+    strncat(aux_buffer, " ", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     add_justification(info->vert_justification);
-    strcat(aux_buffer, ")");
+    strncat(aux_buffer, ")", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
 
     return aux_buffer;
 }
@@ -262,22 +284,264 @@ const char* Symbol::build_justification(const Component::Information* info) {
 void Symbol::add_justification(char identifier) {
     switch (identifier) {
         case 'L':
-            strcat(aux_buffer, "left");
+            strncat(aux_buffer, "left",
+                    sizeof(aux_buffer) - strlen(aux_buffer) - 1);
             break;
         case 'R':
-            strcat(aux_buffer, "right");
+            strncat(aux_buffer, "right",
+                    sizeof(aux_buffer) - strlen(aux_buffer) - 1);
             break;
         case 'C':
-            strcat(aux_buffer, "centre");
+            strncat(aux_buffer, "centre",
+                    sizeof(aux_buffer) - strlen(aux_buffer) - 1);
             break;
         case 'B':
-            strcat(aux_buffer, "bottom");
+            strncat(aux_buffer, "bottom",
+                    sizeof(aux_buffer) - strlen(aux_buffer) - 1);
             break;
         case 'T':
-            strcat(aux_buffer, "top");
+            strncat(aux_buffer, "top",
+                    sizeof(aux_buffer) - strlen(aux_buffer) - 1);
             break;
         default:
             return;
     }
 }
 
+
+bool Symbol::build_graphics(Legacy* legacy_component) {
+    memset(buffer, 0, sizeof(buffer));
+
+    snprintf(buffer, sizeof(buffer), "    (symbol \"%s_0_0\"",
+             legacy_component->def.name);
+
+    // Start of graphics section
+    if (!write_to_file(buffer)) {
+        return false;
+    }
+
+    // Polygons
+    if (!legacy_component->polygons.empty()) {
+        if (!build_polygons(legacy_component->polygons)) {
+            return false;
+        }
+    }
+
+    // Closing bracket - end of graphics section
+    if (!write_to_file("    )")) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Adds polygons from legacy component into a .kicad_sym file.
+ *
+ * @example
+ * (polyline
+ *   COORDINATE_POINT_LIST
+ *   STROKE_DEFINITION
+ *   FILL_DEFINITION
+ * )
+ *
+ * @param polygons
+ * @return
+ */
+bool Symbol::build_polygons(const std::vector<Component::Polygon>& polygons) {
+    double x0, y0, x1, y1;
+    double stroke_width;
+    std::string fill;
+
+    for (const auto& polygon: polygons) {
+        memset(aux_buffer, 0, sizeof(aux_buffer));
+
+        x0 = Utils::mils_to_millimeters(polygon.x0);
+        y0 = Utils::mils_to_millimeters(polygon.y0);
+        x1 = Utils::mils_to_millimeters(polygon.x1);
+        y1 = Utils::mils_to_millimeters(polygon.y1);
+        stroke_width = Utils::mils_to_millimeters(polygon.thickness);
+
+        switch (polygon.background) {
+            case 'F':
+                fill = "background"; // Filled
+                break;
+            case 'f':
+                fill = "outline"; // Filled with dots
+                break;
+            case 'N':
+            default:
+                fill = "none"; // Transparent
+                break;
+        }
+
+        snprintf(aux_buffer,
+                 sizeof(aux_buffer),
+                 "      (polyline\n"
+                 "        (pts\n"
+                 "          (xy %.3f %.3f)\n"
+                 "          (xy %.3f %.3f)\n"
+                 "        )\n"
+                 "        (stroke (width %.3f) (type default) color(0 0 0 0))\n"
+                 "        (fill (type %s)\n"
+                 "      )",
+                 x0, y0, x1, y1, stroke_width, fill.c_str());
+
+        // Write polygon to file
+        if (!write_to_file(aux_buffer)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Symbol::build_pins(const Legacy* legacy_component) {
+    double pos_x, pos_y;
+    std::string pin_type;
+    int orientation;
+    double length;
+    PinShape pin_shape;
+
+    for (const auto& pin: legacy_component->pins) {
+        memset(buffer, 0, sizeof(buffer));
+
+        pin_type = get_pin_type(pin.electric_type);
+        pin_shape = get_pin_shape(pin.shape);
+
+        pos_x = Utils::mils_to_millimeters(pin.pos_x);
+        pos_y = Utils::mils_to_millimeters(pin.pos_y);
+        orientation = get_pin_orientation(pin.orientation);
+        length = Utils::mils_to_millimeters(pin.length);
+
+        // TODO add font for pins here
+        // Needs the build_font() method to accept a pin's font
+        // parameters
+        snprintf(buffer, sizeof(buffer),
+                 "      (pin %s %s (at %.3f %.3f %d) (length %.3f)\n"
+                 "        (name \"%s\" (effects ",
+                 pin_type.c_str(), pin_shape.shape.c_str(),
+                 pos_x, pos_y, orientation, length, pin.name,
+                 );
+
+    }
+
+
+    return true;
+}
+
+std::string Symbol::get_pin_type(const char identifier) {
+    std::string pin_type;
+
+    switch (identifier) {
+        case Component::PinElectricalType::INPUT:
+            pin_type = "input";
+            break;
+        case Component::PinElectricalType::OUTPUT:
+            pin_type = "output";
+            break;
+        case Component::PinElectricalType::BIDIRECTIONAL:
+            pin_type = "bidirectional";
+            break;
+        case Component::PinElectricalType::TRI_STATE:
+            pin_type = "tri_state";
+            break;
+        case Component::PinElectricalType::PASSIVE:
+            pin_type = "passive";
+            break;
+        case Component::PinElectricalType::POWER_INPUT:
+            pin_type = "power_in";
+            break;
+        case Component::PinElectricalType::POWER_OUTPUT:
+            pin_type = "power_out";
+            break;
+        case Component::PinElectricalType::OPEN_COLLECTOR:
+            pin_type = "open_collector";
+            break;
+        case Component::PinElectricalType::OPEN_EMITTER:
+            pin_type = "open_emitter";
+            break;
+        case Component::PinElectricalType::NOT_CONNECTED:
+            pin_type = "free";
+            break;
+        case Component::PinElectricalType::UNSPECIFIED:
+        default:
+            pin_type = "unspecified";
+            break;
+    }
+
+    return pin_type;
+}
+
+Symbol::PinShape Symbol::get_pin_shape(const char* shape_buf) {
+    PinShape pin_shape;
+
+    // Pin shape not found
+    if (strlen(shape_buf) == 0) {
+        pin_shape.shape = "line"; // Default is line
+        return pin_shape;
+    }
+
+    int offset = 0;
+    if (shape_buf[0] == 'N') {
+        offset = 1;
+        pin_shape.visible = false;
+        pin_shape.identifier = shape_buf[offset++];
+    } else {
+        pin_shape.visible = true;
+        pin_shape.identifier = shape_buf[offset++];
+    }
+
+    switch (pin_shape.identifier) {
+        case 'I': // Inverted
+            pin_shape.shape = "inverted";
+            break;
+        case 'C': // Clock
+            if (shape_buf[offset] == 'I') { // CI
+                pin_shape.shape = "inverted_clock";
+            } else if (shape_buf[offset] == 'L') { // CL
+                pin_shape.shape = "clock_low";
+            } else { // C
+                pin_shape.shape = "clock";
+            }
+            break;
+        case 'L':
+            pin_shape.shape = "input_low";
+            break;
+        case 'V':
+            pin_shape.shape = "output_low";
+            break;
+        case 'F':
+            pin_shape.shape = "edge_clock_high";
+            break;
+        case 'X':
+            pin_shape.shape = "non_logic";
+            break;
+        default:
+            pin_shape.shape = "line";
+            break;
+    }
+
+    return pin_shape;
+}
+
+int Symbol::get_pin_orientation(const char identifier) {
+    int angle;
+
+    switch (identifier) {
+        case 'D':
+            angle = 180;
+            break;
+        case 'R':
+            angle = 90;
+            break;
+        case 'L':
+            angle = 270;
+            break;
+        default:
+        case 'U':
+            angle = 0;
+    }
+
+    return angle;
+}
