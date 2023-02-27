@@ -40,4 +40,6 @@ public:
     static bool assert_true(char c);
 
     static double mils_to_millimeters(int mils);
+
+    static std::string replace_empty_quotes(const std::string& input);
 };

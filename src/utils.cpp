@@ -66,3 +66,26 @@ double Utils::mils_to_millimeters(int mils) {
     return (double) mils * 0.0254;
 }
 
+std::string Utils::replace_empty_quotes(const std::string& input) {
+    std::string buf;
+    std::size_t pos = 0;
+    std::size_t prev_pos;
+    std::string empty_quotes = "\"\"";
+    std::string replacement = "\"None\"";
+
+    buf.reserve(input.size());
+
+    while (true) {
+        prev_pos = pos;
+        pos = input.find(empty_quotes, pos);
+        if (pos == std::string::npos) { break; }
+        buf.append(input, prev_pos, pos - prev_pos);
+        buf.append(replacement);
+        pos += empty_quotes.size();
+    }
+
+    buf.append(input, prev_pos, input.size() - prev_pos);
+
+    return buf;
+}
+

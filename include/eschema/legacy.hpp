@@ -32,6 +32,7 @@
 
 #include "eschema/component.hpp"
 #include "eschema/config.hpp"
+#include "utils.hpp"
 
 class Legacy {
 public:
@@ -44,25 +45,25 @@ public:
     std::vector<Component::Arc> arcs;
     std::vector<Component::Text> texts;
 
-    bool convert(const std::vector<std::string> &lines);
+    bool convert(const std::vector<std::string>& lines);
 
-    bool identify(const std::string &token, const std::string &line);
+    bool identify(const std::string& token, const std::string& line);
 
-    bool parse_definition(const std::string &line);
+    bool parse_definition(const std::string& line);
 
-    bool parse_information(const std::string &line);
+    bool parse_information(const std::string& line);
 
-    bool parse_pin(const std::string &line);
+    bool parse_pin(const std::string& line);
 
-    bool parse_rectangle(const std::string &line);
+    bool parse_rectangle(const std::string& line);
 
-    bool parse_polygon(const std::string &line);
+    bool parse_polygon(const std::string& line);
 
-    bool parse_circle(const std::string &line);
+    bool parse_circle(const std::string& line);
 
-    bool parse_arc(const std::string &line);
+    bool parse_arc(const std::string& line);
 
-    bool parse_text(const std::string &line);
+    bool parse_text(const std::string& line);
 
 private:
 
