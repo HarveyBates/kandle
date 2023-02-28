@@ -76,4 +76,6 @@ private:
     static std::string get_pin_type(char identifier);
 
     static int get_pin_orientation(char identifier);
+
+    bool build_circles(const std::vector<Component::Circle>& circles);
 };

@@ -331,6 +331,13 @@ bool Symbol::build_graphics(Legacy* legacy_component) {
         }
     }
 
+    // Cirlces
+    if (!legacy_component->circles.empty()) {
+        if (!build_circles(legacy_component->circles)) {
+            return false;
+        }
+    }
+
     // Pins
     if (!build_pins(legacy_component)) {
         std::cout << "Error building pins" << std::endl;
@@ -566,4 +573,48 @@ int Symbol::get_pin_orientation(const char identifier) {
     }
 
     return angle;
+}
+
+bool Symbol::build_circles(const std::vector<Component::Circle>& circles) {
+    double pos_x, pos_y;
+    double radius;
+    double stroke_width;
+    std::string fill;
+
+    for (const auto& circle: circles) {
+        memset(buffer, 0, sizeof(buffer));
+
+        pos_x = Utils::mils_to_millimeters(circle.posx);
+        pos_y = Utils::mils_to_millimeters(circle.posy);
+        radius = Utils::mils_to_millimeters(circle.radius);
+        stroke_width = Utils::mils_to_millimeters(circle.thickness);
+
+        switch (circle.background) {
+            case 'F':
+                fill = "background"; // Filled
+                break;
+            case 'f':
+                fill = "outline"; // Filled with dots
+                break;
+            case 'N':
+            default:
+                fill = "none"; // Transparent
+                break;
+        }
+
+        snprintf(buffer,
+                 sizeof(buffer),
+                 "      (circle\n"
+                 "        (center %.3f %.3f)\n"
+                 "        (radius %.3f)\n"
+                 "        (stroke (width %.3f) (type default) (color 0 0 0 0))"
+                 " (fill (type %s))\n"
+                 "      )", pos_x, pos_y, radius, stroke_width, fill.c_str());
+
+        if (!write_to_file(buffer)) {
+            return false;
+        }
+    }
+
+    return true;
 }
