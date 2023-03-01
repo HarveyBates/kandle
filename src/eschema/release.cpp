@@ -331,9 +331,23 @@ bool Symbol::build_graphics(Legacy* legacy_component) {
         }
     }
 
-    // Cirlces
+    // Circles
     if (!legacy_component->circles.empty()) {
         if (!build_circles(legacy_component->circles)) {
+            return false;
+        }
+    }
+
+    // Arcs
+    if (!legacy_component->arcs.empty()) {
+        if (!build_arcs(legacy_component->arcs)) {
+            return false;
+        }
+    }
+
+    // Rectangles
+    if (!legacy_component->rectangles.empty()) {
+        if (!build_rectangles(legacy_component->rectangles)) {
             return false;
         }
     }
@@ -610,6 +624,141 @@ bool Symbol::build_circles(const std::vector<Component::Circle>& circles) {
                  "        (stroke (width %.3f) (type default) (color 0 0 0 0))"
                  " (fill (type %s))\n"
                  "      )", pos_x, pos_y, radius, stroke_width, fill.c_str());
+
+        if (!write_to_file(buffer)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Symbol::build_arcs(const std::vector<Component::Arc>& arcs) {
+    double start_x, start_y;
+    double mid_x, mid_y;
+    double end_x, end_y;
+    double stroke_width;
+    std::string fill;
+
+    for (const auto& arc: arcs) {
+        memset(buffer, 0, sizeof(buffer));
+
+        start_x = Utils::mils_to_millimeters(arc.start_point_x);
+        start_y = Utils::mils_to_millimeters(arc.start_point_y);
+        mid_x = Utils::mils_to_millimeters(arc.posx);
+        mid_y = Utils::mils_to_millimeters(arc.posy);
+        end_x = Utils::mils_to_millimeters(arc.end_point_x);
+        end_y = Utils::mils_to_millimeters(arc.end_point_y);
+
+        stroke_width = Utils::mils_to_millimeters(arc.thickness);
+
+        switch (arc.background) {
+            case 'F':
+                fill = "background"; // Filled
+                break;
+            case 'f':
+                fill = "outline"; // Filled with dots
+                break;
+            case 'N':
+            default:
+                fill = "none"; // Transparent
+                break;
+        }
+
+        snprintf(buffer,
+                 sizeof(buffer),
+                 "      (arc\n"
+                 "        (start %.3f %.3f)\n"
+                 "        (mid %.3f %.3f)\n"
+                 "        (end %.3f %.3f)\n"
+                 "        (stroke (width %.3f) (type default) (color 0 0 0 0))"
+                 " (fill (type %s))\n"
+                 "      )",
+                 start_x, start_y, mid_x, mid_y, end_x, end_y,
+                 stroke_width, fill.c_str());
+
+        if (!write_to_file(buffer)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Symbol::build_rectangles(
+        const std::vector<Component::Rectangle>& rectangles) {
+    double start_x, start_y;
+    double end_x, end_y;
+    double stroke_width;
+    std::string fill;
+
+    for (const auto& rectangle: rectangles) {
+        memset(buffer, 0, sizeof(buffer));
+
+        start_x = Utils::mils_to_millimeters(rectangle.startx);
+        start_y = Utils::mils_to_millimeters(rectangle.starty);
+        end_x = Utils::mils_to_millimeters(rectangle.endx);
+        end_y = Utils::mils_to_millimeters(rectangle.endy);
+
+        stroke_width = Utils::mils_to_millimeters(rectangle.thickness);
+
+        switch (rectangle.background) {
+            case 'F':
+                fill = "background"; // Filled
+                break;
+            case 'f':
+                fill = "outline"; // Filled with dots
+                break;
+            case 'N':
+            default:
+                fill = "none"; // Transparent
+                break;
+        }
+
+        snprintf(buffer,
+                 sizeof(buffer),
+                 "      (rectangle\n"
+                 "        (start %.3f %.3f)\n"
+                 "        (end %.3f %.3f)\n"
+                 "        (stroke (width %.3f) (type default) (color 0 0 0 0))"
+                 " (fill (type %s))\n"
+                 "      )",
+                 start_x, start_y, end_x, end_y, stroke_width, fill.c_str());
+
+        if (!write_to_file(buffer)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Symbol::build_text_fields(
+        const std::vector<Component::Text>& text_fields) {
+    double pos_x, pos_y;
+    double rotation;
+    char text_effects[128];
+    std::string fill;
+
+    for (const auto& text_field: text_fields) {
+        memset(buffer, 0, sizeof(buffer));
+        memset(text_effects, 0, sizeof(text_effects));
+
+        pos_x = Utils::mils_to_millimeters(text_field.posx);
+        pos_y = Utils::mils_to_millimeters(text_field.posy);
+        rotation = Utils::mils_to_millimeters(text_field.orientation);
+
+        memcpy(text_effects, build_font(text_field.dimension),
+               sizeof(text_effects));
+
+        snprintf(buffer,
+                 sizeof(buffer),
+                 "      (text\n"
+                 "        \"%s\"\n"
+                 "        (at %.3f %.3f %.3f)\n"
+                 "        (effects %s"
+                 "      )",
+                 text_field.text, pos_x, pos_y, rotation, text_effects);
 
         if (!write_to_file(buffer)) {
             return false;

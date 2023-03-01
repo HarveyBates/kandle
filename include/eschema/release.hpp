@@ -78,4 +78,10 @@ private:
     static int get_pin_orientation(char identifier);
 
     bool build_circles(const std::vector<Component::Circle>& circles);
+
+    bool build_arcs(const std::vector<Component::Arc>& arcs);
+
+    bool build_rectangles(const std::vector<Component::Rectangle>& rectangles);
+
+    bool build_text_fields(const std::vector<Component::Text>& text_fields);
 };
