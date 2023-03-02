@@ -1,0 +1,52 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# OP07CD
+#
+DEF OP07CD U 0 40 Y Y 1 L N
+F0 "U" -300 539 50 H V L BNN
+F1 "OP07CD" -300 -757 50 H V L BNN
+F2 "SOIC127P599X175-8N" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "SOIC-8 Texas Instruments" 0 0 50 H I L BNN "PACKAGE"
+F5 "Good" 0 0 50 H I L BNN "AVAILABILITY"
+F6 "https://snapeda.com/shop?store=DigiKey&id=516771" 0 0 50 H I L BNN "DIGIKEY-PURCHASE-URL"
+F7 "OP07CD" 0 0 50 H I L BNN "MP"
+F8 "Texas Instruments" 0 0 50 H I L BNN "MF"
+F9 "None" 0 0 50 H I L BNN "PRICE"
+F10 "Low-Offset voltage (0.25mV) single operational amplifier 8-SOIC 0 to 70" 0 0 50 H I L BNN "DESCRIPTION"
+F11 "https://snapeda.com/shop?store=Mouser&id=516771" 0 0 50 H I L BNN "MOUSER-PURCHASE-URL"
+F12 "https://snapeda.com/shop?store=Texas+Instruments&id=516771" 0 0 50 H I L BNN "TEXAS_INSTRUMENTS-PURCHASE-URL"
+DRAW
+P 2 0 0 16 -200 200 -200 100 N
+P 2 0 0 16 -200 100 -200 -100 N
+P 2 0 0 16 -200 -100 -200 -200 N
+P 2 0 0 16 -200 -200 0 -100 N
+P 2 0 0 16 0 -100 200 0 N
+P 2 0 0 16 200 0 0 100 N
+P 2 0 0 16 0 100 -200 200 N
+P 2 0 0 6 -150 -75 -150 -125 N
+P 2 0 0 6 -175 100 -125 100 N
+P 2 0 0 6 -175 -100 -125 -100 N
+P 2 0 0 10 -300 300 0 300 N
+P 2 0 0 10 0 300 0 100 N
+P 2 0 0 10 -300 -300 0 -300 N
+P 2 0 0 10 0 -300 0 -100 N
+P 2 0 0 10 -300 100 -200 100 N
+P 2 0 0 10 -300 -100 -200 -100 N
+P 2 0 0 10 200 0 300 0 N
+S -300 -600 300 500 0 0 10 f
+X ~ 3 -500 -100 200 R 40 40 0 0 I 
+X ~ 2 -500 100 200 R 40 40 0 0 I 
+X ~ 1 -500 300 200 R 40 40 0 0 I 
+X ~ 8 -500 -300 200 R 40 40 0 0 I 
+X VCC+ 7 500 400 200 L 40 40 0 0 W 
+X VCC- 4 500 -400 200 L 40 40 0 0 W 
+X ~ 6 500 0 200 L 40 40 0 0 O 
+X NC 5 500 -500 200 L 40 40 0 0 N 
+ENDDRAW
+ENDDEF
+#
+# End Library

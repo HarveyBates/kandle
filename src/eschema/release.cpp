@@ -46,6 +46,10 @@ bool Symbol::new_from_legacy(Legacy* legacy_component,
         return false;
     }
 
+    if (!write_to_file("  )\n)")) {
+        return false;
+    }
+
     return true;
 }
 
@@ -269,12 +273,14 @@ const char* Symbol::build_text_justification(
         const Component::Information* info) {
     memset(aux_buffer, 0, sizeof(aux_buffer));
 
-    strncat(aux_buffer, "(justify ",
-            sizeof(aux_buffer) - strlen(aux_buffer) - 1);
-    add_justification(info->horz_justification);
-    strncat(aux_buffer, " ", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
-    add_justification(info->vert_justification);
-    strncat(aux_buffer, ")", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
+    if (info->horz_justification != 'C') {
+        strncat(aux_buffer, "(justify ",
+                sizeof(aux_buffer) - strlen(aux_buffer) - 1);
+        add_justification(info->horz_justification);
+        strncat(aux_buffer, " ", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
+        add_justification(info->vert_justification);
+        strncat(aux_buffer, ")", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
+    }
 
     return aux_buffer;
 }
@@ -293,10 +299,6 @@ void Symbol::add_justification(char identifier) {
             break;
         case 'R':
             strncat(aux_buffer, "right",
-                    sizeof(aux_buffer) - strlen(aux_buffer) - 1);
-            break;
-        case 'C':
-            strncat(aux_buffer, "centre",
                     sizeof(aux_buffer) - strlen(aux_buffer) - 1);
             break;
         case 'B':

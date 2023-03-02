@@ -1,0 +1,38 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# SMA_CONNECTOR
+#
+DEF SMA_CONNECTOR J 0 40 N N 1 L N
+F0 "J" -150 60 50 H V L BNN
+F1 "SMA_CONNECTOR" -160 -270 50 H V L BNN
+F2 "LPRS_SMA_CONNECTOR" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "LPRS" 0 0 50 H I L BNN "MANUFACTURER"
+F5 "8.3 mm" 0 0 50 H I L BNN "MAXIMUM_PACKAGE_HEIGHT"
+F6 "1.3" 0 0 50 H I L BNN "PARTREV"
+F7 "Manufacturer Recommendations" 0 0 50 H I L BNN "STANDARD"
+DRAW
+C 0 0 40 0 0 10 N
+P 2 0 0 10 -40 -40 0 -40 N
+P 2 0 0 10 0 -40 40 -40 N
+P 2 0 0 10 0 -40 0 -130 N
+C 0 -100 10 0 0 10 N
+P 2 0 0 10 0 -130 -30 -130 N
+P 2 0 0 10 0 -130 30 -130 N
+P 2 0 0 10 -30 -130 -50 -160 N
+P 2 0 0 10 0 -130 -20 -160 N
+P 2 0 0 10 30 -130 10 -160 N
+A -125 0 25 2700 4499 0 0 10 N -125 -25 -125 25
+A -125 -100 25 2700 4499 0 0 10 N -125 -125 -125 -75
+X ~ 1 100 0 200 L 40 40 0 0 P 
+X ~ G1 100 -100 200 L 40 40 0 0 P 
+X ~ G2 100 -100 200 L 40 40 0 0 P 
+X ~ G3 100 -100 200 L 40 40 0 0 P 
+X ~ G4 100 -100 200 L 40 40 0 0 P 
+ENDDRAW
+ENDDEF
+#
+# End Library

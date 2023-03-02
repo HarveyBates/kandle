@@ -1,0 +1,28 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# TSC101BILT
+#
+DEF TSC101BILT U 0 40 Y Y 1 L N
+F0 "U" -217 397 50 H V L BNN
+F1 "TSC101BILT" -168 -759 50 H V L BNN
+F2 "SOT95P290X145-5N" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "26R7207" 0 0 50 H I L BNN "OC_NEWARK"
+F5 "1737212" 0 0 50 H I L BNN "OC_FARNELL"
+F6 "TSC101BILT" 0 0 50 H I L BNN "MPN"
+F7 "STMICROELECTRONICS" 0 0 50 H I L BNN "SUPPLIER"
+F8 "SOT-23-5" 0 0 50 H I L BNN "PACKAGE"
+DRAW
+S -500 -600 500 300 0 0 16 f
+X VCC 5 -700 100 200 R 40 40 0 0 W 
+X VP 3 -700 -100 200 R 40 40 0 0 I 
+X VM 4 -700 -200 200 R 40 40 0 0 I 
+X GND 2 -700 -400 200 R 40 40 0 0 P 
+X OUT 1 700 100 200 L 40 40 0 0 O 
+ENDDRAW
+ENDDEF
+#
+# End Library
