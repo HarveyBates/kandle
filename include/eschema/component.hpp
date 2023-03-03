@@ -1,26 +1,23 @@
-/*
- * MIT License
- *
- * Copyright (c) 2023 Harvey Bates
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// MIT License
+//
+// Copyright (c) 2023 Harvey Bates
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
@@ -29,8 +26,8 @@ public:
 
     // This information comes from the "DEF" identifier
     struct Definition {
-        char name[50]{};
-        char reference[25]{};
+        char name[UINT8_MAX]{};
+        char reference[UINT8_MAX]{};
         int pin_name_offset{};
         char show_pin_number{};
         char show_pin_name{};
@@ -40,7 +37,7 @@ public:
 
     // This comes from F0 ... Fn
     struct Information {
-        char text[50]{};
+        char text[UINT8_MAX]{};
         int pos_x{};
         int pos_y{};
         int dimension{};
@@ -51,7 +48,7 @@ public:
         char vert_justification{};
         char italic{};
         char bold{};
-        char field_name[50]{};
+        char field_name[UINT8_MAX]{};
     };
 
     enum PinElectricalType : char {
@@ -69,7 +66,7 @@ public:
     };
 
     struct Pin {
-        char name[50]{};
+        char name[UINT8_MAX]{};
         char number[4]{};
         int pos_x;
         int pos_y;
@@ -142,6 +139,6 @@ public:
         int dimension;
         int unit;
         int convert;
-        char text[50]{};
+        char text[UINT8_MAX]{};
     };
 };

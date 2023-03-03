@@ -6,6 +6,7 @@
 # User defined directories
 build
 cmake-build
+cmake-build-debug
 .idea
 files
 

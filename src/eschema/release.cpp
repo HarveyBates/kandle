@@ -1,31 +1,28 @@
-/*
- * MIT License
- *
- * Copyright (c) 2023 Harvey Bates
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// MIT License
+//
+// Copyright (c) 2023 Harvey Bates
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "eschema/release.hpp"
 
-bool Symbol::new_from_legacy(Legacy* legacy_component,
-                             const std::string& filename) {
+bool Symbol::new_from_legacy(Legacy *legacy_component,
+                             const std::string &filename) {
     output_filename = filename;
 
     // Each of these methods write to a file (filename)
@@ -53,7 +50,7 @@ bool Symbol::new_from_legacy(Legacy* legacy_component,
     return true;
 }
 
-bool Symbol::write_to_file(const char* contents) {
+bool Symbol::write_to_file(const char *contents) {
 
     std::fstream symbolFile(output_filename,
                             std::fstream::out | std::fstream::app);
@@ -106,7 +103,7 @@ bool Symbol::build_header() {
  *   [(unit_name "UNIT_NAME")]
  * )
  */
-bool Symbol::build_symbol(Legacy* legacy_component) {
+bool Symbol::build_symbol(Legacy *legacy_component) {
     char pin_buf[AUX_BUF_SIZE]{};
     memset(buffer, 0, sizeof(buffer));
 
@@ -127,7 +124,7 @@ bool Symbol::build_symbol(Legacy* legacy_component) {
  * @param legacy_component
  * @return
  */
-const char* Symbol::build_pins_definition(Legacy* legacy_component) {
+const char *Symbol::build_pins_definition(Legacy *legacy_component) {
     char buf[40]{};
 
     memset(aux_buffer, 0, sizeof(aux_buffer));
@@ -141,7 +138,7 @@ const char* Symbol::build_pins_definition(Legacy* legacy_component) {
             legacy_component->def.pin_name_offset);
 
     if (Utils::assert_true(legacy_component->def.show_pin_name)) {
-        snprintf(buf, sizeof(buf), "(pin_names (offset %.3f) show)", offset);
+        snprintf(buf, sizeof(buf), "(pin_names (offset %.3f))", offset);
         strncat(aux_buffer, buf, sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     } else {
         snprintf(buf, sizeof(buf), "(pin_names (offset %.3f) hide)", offset);
@@ -165,19 +162,19 @@ const char* Symbol::build_pins_definition(Legacy* legacy_component) {
  * @param legacy_component
  * @return
  */
-bool Symbol::build_properties(Legacy* legacy_component) {
+bool Symbol::build_properties(Legacy *legacy_component) {
     double pos_x, pos_y;
     char font_buf[AUX_BUF_SIZE];
     char justify_buf[AUX_BUF_SIZE];
-    const char* key;
+    const char *key;
 
     // Inbuilt keys (in order)
     const int N_INBUILT_KEYS = 4;
-    const char* keys[N_INBUILT_KEYS] = {"Reference", "Value", "Footprint",
+    const char *keys[N_INBUILT_KEYS] = {"Reference", "Value", "Footprint",
                                         "Datasheet"};
 
     int i = 0;
-    for (const auto& info: legacy_component->info) {
+    for (const auto &info: legacy_component->info) {
         memset(buffer, 0, sizeof(buffer));
 
         // Assign the key from either the 4 inbuilt keys or a special key
@@ -235,7 +232,7 @@ bool Symbol::build_properties(Legacy* legacy_component) {
  * @param info
  * @return
  */
-const char* Symbol::build_font(const int font_size,
+const char *Symbol::build_font(const int font_size,
                                const char bold,
                                const char italic) {
     double font_size_f = Utils::mils_to_millimeters(font_size);
@@ -269,8 +266,8 @@ const char* Symbol::build_font(const int font_size,
  * @param info
  * @return
  */
-const char* Symbol::build_text_justification(
-        const Component::Information* info) {
+const char *Symbol::build_text_justification(
+        const Component::Information *info) {
     memset(aux_buffer, 0, sizeof(aux_buffer));
 
     if (info->horz_justification != 'C') {
@@ -315,7 +312,7 @@ void Symbol::add_justification(char identifier) {
 }
 
 
-bool Symbol::build_graphics(Legacy* legacy_component) {
+bool Symbol::build_graphics(Legacy *legacy_component) {
     memset(buffer, 0, sizeof(buffer));
 
     snprintf(buffer, sizeof(buffer), "    (symbol \"%s_0_0\"",
@@ -381,12 +378,12 @@ bool Symbol::build_graphics(Legacy* legacy_component) {
  * @param polygons
  * @return
  */
-bool Symbol::build_polygons(const std::vector<Component::Polygon>& polygons) {
+bool Symbol::build_polygons(const std::vector<Component::Polygon> &polygons) {
     double x0, y0, x1, y1;
     double stroke_width;
     std::string fill;
 
-    for (const auto& polygon: polygons) {
+    for (const auto &polygon: polygons) {
         memset(aux_buffer, 0, sizeof(aux_buffer));
 
         x0 = Utils::mils_to_millimeters(polygon.x0);
@@ -397,10 +394,8 @@ bool Symbol::build_polygons(const std::vector<Component::Polygon>& polygons) {
 
         switch (polygon.background) {
             case 'F':
-                fill = "background"; // Filled
-                break;
             case 'f':
-                fill = "outline"; // Filled with dots
+                fill = "background"; // Filled
                 break;
             case 'N':
             default:
@@ -429,7 +424,7 @@ bool Symbol::build_polygons(const std::vector<Component::Polygon>& polygons) {
     return true;
 }
 
-bool Symbol::build_pins(const Legacy* legacy_component) {
+bool Symbol::build_pins(const Legacy *legacy_component) {
     double pos_x, pos_y;
     std::string pin_type;
     int orientation;
@@ -438,7 +433,7 @@ bool Symbol::build_pins(const Legacy* legacy_component) {
     char font_name_buf[128];
     char font_num_buf[128];
 
-    for (const auto& pin: legacy_component->pins) {
+    for (const auto &pin: legacy_component->pins) {
         memset(buffer, 0, sizeof(buffer));
         memset(font_name_buf, 0, sizeof(font_num_buf));
         memset(font_num_buf, 0, sizeof(font_num_buf));
@@ -518,7 +513,7 @@ std::string Symbol::get_pin_type(const char identifier) {
     return pin_type;
 }
 
-Symbol::PinShape Symbol::get_pin_shape(const char* shape_buf) {
+Symbol::PinShape Symbol::get_pin_shape(const char *shape_buf) {
     PinShape pin_shape;
 
     // Pin shape not found
@@ -575,7 +570,7 @@ int Symbol::get_pin_orientation(const char identifier) {
 
     switch (identifier) {
         case 'D':
-            angle = 90;
+            angle = 270;
             break;
         case 'R':
             angle = 0;
@@ -585,19 +580,19 @@ int Symbol::get_pin_orientation(const char identifier) {
             break;
         case 'U':
         default:
-            angle = 270;
+            angle = 90;
     }
 
     return angle;
 }
 
-bool Symbol::build_circles(const std::vector<Component::Circle>& circles) {
+bool Symbol::build_circles(const std::vector<Component::Circle> &circles) {
     double pos_x, pos_y;
     double radius;
     double stroke_width;
     std::string fill;
 
-    for (const auto& circle: circles) {
+    for (const auto &circle: circles) {
         memset(buffer, 0, sizeof(buffer));
 
         pos_x = Utils::mils_to_millimeters(circle.posx);
@@ -607,10 +602,8 @@ bool Symbol::build_circles(const std::vector<Component::Circle>& circles) {
 
         switch (circle.background) {
             case 'F':
-                fill = "background"; // Filled
-                break;
             case 'f':
-                fill = "outline"; // Filled with dots
+                fill = "background"; // Filled
                 break;
             case 'N':
             default:
@@ -635,14 +628,14 @@ bool Symbol::build_circles(const std::vector<Component::Circle>& circles) {
     return true;
 }
 
-bool Symbol::build_arcs(const std::vector<Component::Arc>& arcs) {
+bool Symbol::build_arcs(const std::vector<Component::Arc> &arcs) {
     double start_x, start_y;
     double mid_x, mid_y;
     double end_x, end_y;
     double stroke_width;
     std::string fill;
 
-    for (const auto& arc: arcs) {
+    for (const auto &arc: arcs) {
         memset(buffer, 0, sizeof(buffer));
 
         start_x = Utils::mils_to_millimeters(arc.start_point_x);
@@ -656,10 +649,8 @@ bool Symbol::build_arcs(const std::vector<Component::Arc>& arcs) {
 
         switch (arc.background) {
             case 'F':
-                fill = "background"; // Filled
-                break;
             case 'f':
-                fill = "outline"; // Filled with dots
+                fill = "background"; // Filled
                 break;
             case 'N':
             default:
@@ -669,12 +660,9 @@ bool Symbol::build_arcs(const std::vector<Component::Arc>& arcs) {
 
         snprintf(buffer,
                  sizeof(buffer),
-                 "      (arc\n"
-                 "        (start %.3f %.3f)\n"
-                 "        (mid %.3f %.3f)\n"
-                 "        (end %.3f %.3f)\n"
-                 "        (stroke (width %.3f) (type default) (color 0 0 0 0))"
-                 " (fill (type %s))\n"
+                 "      (arc (start %.3f %.3f) (mid %.3f %.3f) (end %.3f %.3f)\n"
+                 "        (stroke (width %.3f) (type default))\n"
+                 "        (fill (type %s))\n"
                  "      )",
                  start_x, start_y, mid_x, mid_y, end_x, end_y,
                  stroke_width, fill.c_str());
@@ -688,13 +676,13 @@ bool Symbol::build_arcs(const std::vector<Component::Arc>& arcs) {
 }
 
 bool Symbol::build_rectangles(
-        const std::vector<Component::Rectangle>& rectangles) {
+        const std::vector<Component::Rectangle> &rectangles) {
     double start_x, start_y;
     double end_x, end_y;
     double stroke_width;
     std::string fill;
 
-    for (const auto& rectangle: rectangles) {
+    for (const auto &rectangle: rectangles) {
         memset(buffer, 0, sizeof(buffer));
 
         start_x = Utils::mils_to_millimeters(rectangle.startx);
@@ -706,10 +694,8 @@ bool Symbol::build_rectangles(
 
         switch (rectangle.background) {
             case 'F':
-                fill = "background"; // Filled
-                break;
             case 'f':
-                fill = "outline"; // Filled with dots
+                fill = "background"; // Filled
                 break;
             case 'N':
             default:
@@ -719,10 +705,8 @@ bool Symbol::build_rectangles(
 
         snprintf(buffer,
                  sizeof(buffer),
-                 "      (rectangle\n"
-                 "        (start %.3f %.3f)\n"
-                 "        (end %.3f %.3f)\n"
-                 "        (stroke (width %.3f) (type default) (color 0 0 0 0))"
+                 "      (rectangle (start %.3f %.3f) (end %.3f %.3f)\n"
+                 "        (stroke (width %.3f) (type default))"
                  " (fill (type %s))\n"
                  "      )",
                  start_x, start_y, end_x, end_y, stroke_width, fill.c_str());
@@ -736,13 +720,13 @@ bool Symbol::build_rectangles(
 }
 
 bool Symbol::build_text_fields(
-        const std::vector<Component::Text>& text_fields) {
+        const std::vector<Component::Text> &text_fields) {
     double pos_x, pos_y;
     double rotation;
     char text_effects[128];
     std::string fill;
 
-    for (const auto& text_field: text_fields) {
+    for (const auto &text_field: text_fields) {
         memset(buffer, 0, sizeof(buffer));
         memset(text_effects, 0, sizeof(text_effects));
 

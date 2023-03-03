@@ -1,37 +1,34 @@
-/*
- * MIT License
- *
- * Copyright (c) 2023 Harvey Bates
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// MIT License
+//
+// Copyright (c) 2023 Harvey Bates
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "eschema/legacy.hpp"
 
-bool Legacy::convert(const std::vector<std::string>& lines) {
+bool Legacy::convert(const std::vector<std::string> &lines) {
 
     bool found_definition = false;
 
     std::cout << "Converting legacy file." << std::endl;
 
     // Iterate through lines
-    for (const auto& l: lines) {
+    for (const auto &l: lines) {
         std::stringstream strstr(l);
         std::istream_iterator<std::string> it(strstr);
         std::istream_iterator<std::string> end;
@@ -39,7 +36,7 @@ bool Legacy::convert(const std::vector<std::string>& lines) {
 
         // Tokenize the line into its space delimited components
         if (!found_definition) {
-            for (const auto& t: tokens) {
+            for (const auto &t: tokens) {
                 if (t == "DEF") {
                     parse_definition(l);
                     found_definition = true;
@@ -58,8 +55,8 @@ bool Legacy::convert(const std::vector<std::string>& lines) {
 }
 
 bool Legacy::identify(
-        const std::string& token,
-        const std::string& line) {
+        const std::string &token,
+        const std::string &line) {
 
     // Trying not to parse any tokens that are user input
     if (token.length() > 2) {
@@ -103,9 +100,9 @@ bool Legacy::identify(
     return res;
 }
 
-bool Legacy::parse_definition(const std::string& line) {
+bool Legacy::parse_definition(const std::string &line) {
 
-    int res = std::sscanf(line.c_str(), "DEF %50s %25s 0 %d %c %c %d %*c %c",
+    int res = std::sscanf(line.c_str(), "DEF %255s %255s 0 %d %c %c %d %*c %c",
                           def.name, def.reference, &def.pin_name_offset,
                           &def.show_pin_number, &def.show_pin_name,
                           &def.num_units, &def.pwr_cmp);
@@ -117,14 +114,14 @@ bool Legacy::parse_definition(const std::string& line) {
     return true;
 }
 
-bool Legacy::parse_information(const std::string& line) {
+bool Legacy::parse_information(const std::string &line) {
     Component::Information ci;
 
     std::string line_cpy = Utils::replace_empty_quotes(line);
 
     int res =
             std::sscanf(line_cpy.c_str(),
-                        R"(F%*c "%50[^"]" %d %d %d %c %c %c %c%c%c "%50[^"]")",
+                        R"(F%*c "%255[^"]" %d %d %d %c %c %c %c%c%c "%255[^"]")",
                         ci.text, &ci.pos_x, &ci.pos_y, &ci.font_size,
                         &ci.orientation,
                         &ci.visibility, &ci.horz_justification,
@@ -133,8 +130,6 @@ bool Legacy::parse_information(const std::string& line) {
 
     // Expect at least 10 matches (11 if field name is present)
     if (res < 10) {
-        std::cout << res << std::endl;
-        std::cout << ci.font_size << std::endl;
         return false;
     }
 
@@ -147,11 +142,11 @@ bool Legacy::parse_information(const std::string& line) {
 //
 // X TO 1 - 200 0.150 R 40 40 1 1 P
 // X 0 1 0 0 0 R 40 40 1 1 W NC
-bool Legacy::parse_pin(const std::string& line) {
+bool Legacy::parse_pin(const std::string &line) {
     Component::Pin pin;
 
     int res = std::sscanf(line.c_str(),
-                          "X %50s %4s %d %d %d %c %d %d %d %d %c %3s",
+                          "X %255s %4s %d %d %d %c %d %d %d %d %c %3s",
                           pin.name, pin.number, &pin.pos_x, &pin.pos_y,
                           &pin.length,
                           &pin.orientation, &pin.text_num_size,
@@ -172,7 +167,7 @@ bool Legacy::parse_pin(const std::string& line) {
 
 // Example:
 // S 0 50.900.900 0 1 0 f
-bool Legacy::parse_rectangle(const std::string& line) {
+bool Legacy::parse_rectangle(const std::string &line) {
 
     Component::Rectangle rect{};
 
@@ -195,7 +190,7 @@ bool Legacy::parse_rectangle(const std::string& line) {
 // P 3 0 1 0 -50 50 50 0 -50 -50 F
 // P 2 0 1 0 50 50 50 –50 N
 //
-bool Legacy::parse_polygon(const std::string& line) {
+bool Legacy::parse_polygon(const std::string &line) {
     Component::Polygon polygon{};
 
     int res = std::sscanf(line.c_str(), "P %d %d %d %d %d %d %d %d %d %d %c",
@@ -226,7 +221,7 @@ bool Legacy::parse_polygon(const std::string& line) {
     return true;
 }
 
-bool Legacy::parse_circle(const std::string& line) {
+bool Legacy::parse_circle(const std::string &line) {
     Component::Circle circle{};
 
     int res = sscanf(line.c_str(), "C %d %d %d %d %d %d %c",
@@ -247,7 +242,7 @@ bool Legacy::parse_circle(const std::string& line) {
 // Example:
 //
 // A -1 -200 49 900 -11 0 1 0 N -50 -200 0 -150 
-bool Legacy::parse_arc(const std::string& line) {
+bool Legacy::parse_arc(const std::string &line) {
     Component::Arc arc{};
 
     int res = sscanf(line.c_str(),
@@ -266,7 +261,7 @@ bool Legacy::parse_arc(const std::string& line) {
     return true;
 }
 
-bool Legacy::parse_text(const std::string& line) {
+bool Legacy::parse_text(const std::string &line) {
     Component::Text t{};
 
     int res = sscanf(line.c_str(),
