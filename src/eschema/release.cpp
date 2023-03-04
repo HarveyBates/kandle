@@ -1,23 +1,26 @@
-// MIT License
-//
-// Copyright (c) 2023 Harvey Bates
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 Harvey Bates
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 #include "eschema/release.hpp"
 
@@ -106,8 +109,8 @@ bool Symbol::build_header() {
 bool Symbol::build_symbol(Legacy *legacy_component) {
     char pin_buf[AUX_BUF_SIZE]{};
     memset(buffer, 0, sizeof(buffer));
-
-    memcpy(pin_buf, build_pins_definition(legacy_component), sizeof(pin_buf));
+    memcpy(pin_buf, build_pins_definition(legacy_component),
+           sizeof(pin_buf));
 
     snprintf(buffer, sizeof(buffer),
              "  (symbol \"%s\" %s (in_bom yes) (on_board yes)",
@@ -270,12 +273,12 @@ const char *Symbol::build_text_justification(
         const Component::Information *info) {
     memset(aux_buffer, 0, sizeof(aux_buffer));
 
-    if (info->horz_justification != 'C') {
+    if (info->horizontal_justification != 'C') {
         strncat(aux_buffer, "(justify ",
                 sizeof(aux_buffer) - strlen(aux_buffer) - 1);
-        add_justification(info->horz_justification);
+        add_justification(info->horizontal_justification);
         strncat(aux_buffer, " ", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
-        add_justification(info->vert_justification);
+        add_justification(info->vertical_justification);
         strncat(aux_buffer, ")", sizeof(aux_buffer) - strlen(aux_buffer) - 1);
     }
 
@@ -351,6 +354,13 @@ bool Symbol::build_graphics(Legacy *legacy_component) {
         }
     }
 
+    // Text fields
+    if (!legacy_component->texts.empty()) {
+        if (!build_text_fields(legacy_component->texts)) {
+            return false;
+        }
+    }
+
     // Pins
     if (!build_pins(legacy_component)) {
         std::cout << "Error building pins" << std::endl;
@@ -410,7 +420,7 @@ bool Symbol::build_polygons(const std::vector<Component::Polygon> &polygons) {
                  "          (xy %.3f %.3f)\n"
                  "          (xy %.3f %.3f)\n"
                  "        )\n"
-                 "        (stroke (width %.3f) (type default) (color 0 0 0 0))\n"
+                 "        (stroke (width %.3f) (type default))\n"
                  "        (fill (type %s))\n"
                  "      )",
                  x0, y0, x1, y1, stroke_width, fill.c_str());
@@ -595,8 +605,8 @@ bool Symbol::build_circles(const std::vector<Component::Circle> &circles) {
     for (const auto &circle: circles) {
         memset(buffer, 0, sizeof(buffer));
 
-        pos_x = Utils::mils_to_millimeters(circle.posx);
-        pos_y = Utils::mils_to_millimeters(circle.posy);
+        pos_x = Utils::mils_to_millimeters(circle.pos_x);
+        pos_y = Utils::mils_to_millimeters(circle.pos_y);
         radius = Utils::mils_to_millimeters(circle.radius);
         stroke_width = Utils::mils_to_millimeters(circle.thickness);
 
@@ -613,10 +623,8 @@ bool Symbol::build_circles(const std::vector<Component::Circle> &circles) {
 
         snprintf(buffer,
                  sizeof(buffer),
-                 "      (circle\n"
-                 "        (center %.3f %.3f)\n"
-                 "        (radius %.3f)\n"
-                 "        (stroke (width %.3f) (type default) (color 0 0 0 0))"
+                 "      (circle (center %.3f %.3f) (radius %.3f))"
+                 "        (stroke (width %.3f) (type default))"
                  " (fill (type %s))\n"
                  "      )", pos_x, pos_y, radius, stroke_width, fill.c_str());
 
@@ -631,6 +639,7 @@ bool Symbol::build_circles(const std::vector<Component::Circle> &circles) {
 bool Symbol::build_arcs(const std::vector<Component::Arc> &arcs) {
     double start_x, start_y;
     double mid_x, mid_y;
+    double radius;
     double end_x, end_y;
     double stroke_width;
     std::string fill;
@@ -640,10 +649,11 @@ bool Symbol::build_arcs(const std::vector<Component::Arc> &arcs) {
 
         start_x = Utils::mils_to_millimeters(arc.start_point_x);
         start_y = Utils::mils_to_millimeters(arc.start_point_y);
-        mid_x = Utils::mils_to_millimeters(arc.posx);
-        mid_y = Utils::mils_to_millimeters(arc.posy);
+        mid_x = Utils::mils_to_millimeters(arc.pos_x);
+        mid_y = Utils::mils_to_millimeters(arc.pos_y);
         end_x = Utils::mils_to_millimeters(arc.end_point_x);
         end_y = Utils::mils_to_millimeters(arc.end_point_y);
+        radius = Utils::mils_to_millimeters(arc.radius);
 
         stroke_width = Utils::mils_to_millimeters(arc.thickness);
 
@@ -664,7 +674,7 @@ bool Symbol::build_arcs(const std::vector<Component::Arc> &arcs) {
                  "        (stroke (width %.3f) (type default))\n"
                  "        (fill (type %s))\n"
                  "      )",
-                 start_x, start_y, mid_x, mid_y, end_x, end_y,
+                 start_x, start_y, (mid_x + radius), mid_y, end_x, end_y,
                  stroke_width, fill.c_str());
 
         if (!write_to_file(buffer)) {
@@ -685,10 +695,10 @@ bool Symbol::build_rectangles(
     for (const auto &rectangle: rectangles) {
         memset(buffer, 0, sizeof(buffer));
 
-        start_x = Utils::mils_to_millimeters(rectangle.startx);
-        start_y = Utils::mils_to_millimeters(rectangle.starty);
-        end_x = Utils::mils_to_millimeters(rectangle.endx);
-        end_y = Utils::mils_to_millimeters(rectangle.endy);
+        start_x = Utils::mils_to_millimeters(rectangle.start_x);
+        start_y = Utils::mils_to_millimeters(rectangle.start_y);
+        end_x = Utils::mils_to_millimeters(rectangle.end_x);
+        end_y = Utils::mils_to_millimeters(rectangle.end_y);
 
         stroke_width = Utils::mils_to_millimeters(rectangle.thickness);
 
@@ -730,8 +740,8 @@ bool Symbol::build_text_fields(
         memset(buffer, 0, sizeof(buffer));
         memset(text_effects, 0, sizeof(text_effects));
 
-        pos_x = Utils::mils_to_millimeters(text_field.posx);
-        pos_y = Utils::mils_to_millimeters(text_field.posy);
+        pos_x = Utils::mils_to_millimeters(text_field.pos_x);
+        pos_y = Utils::mils_to_millimeters(text_field.pos_y);
         rotation = Utils::mils_to_millimeters(text_field.orientation);
 
         memcpy(text_effects, build_font(text_field.dimension),
