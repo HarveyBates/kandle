@@ -44,8 +44,8 @@ public:
         char orientation{}; // H (horizontal) or V (vert)
         char visibility{}; // V (visible) or I (invisible)
         int font_size{};
-        char horz_justification{};
-        char vert_justification{};
+        char horizontal_justification{};
+        char vertical_justification{};
         char italic{};
         char bold{};
         char field_name[UINT8_MAX]{};
@@ -82,10 +82,10 @@ public:
     };
 
     struct Rectangle {
-        int startx;
-        int starty;
-        int endx;
-        int endy;
+        int start_x;
+        int start_y;
+        int end_x;
+        int end_y;
         int unit;
         int convert;
         int thickness;
@@ -107,8 +107,8 @@ public:
     };
 
     struct Circle {
-        int posx;
-        int posy;
+        int pos_x;
+        int pos_y;
         int radius;
         int unit;
         int convert;
@@ -117,8 +117,8 @@ public:
     };
 
     struct Arc {
-        int posx;
-        int posy;
+        int pos_x;
+        int pos_y;
         int radius;
         int start_angle;
         int end_angle;
@@ -134,8 +134,8 @@ public:
 
     struct Text {
         int orientation;
-        int posx;
-        int posy;
+        int pos_x;
+        int pos_y;
         int dimension;
         int unit;
         int convert;

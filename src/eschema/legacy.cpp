@@ -124,8 +124,8 @@ bool Legacy::parse_information(const std::string &line) {
                         R"(F%*c "%255[^"]" %d %d %d %c %c %c %c%c%c "%255[^"]")",
                         ci.text, &ci.pos_x, &ci.pos_y, &ci.font_size,
                         &ci.orientation,
-                        &ci.visibility, &ci.horz_justification,
-                        &ci.vert_justification,
+                        &ci.visibility, &ci.horizontal_justification,
+                        &ci.vertical_justification,
                         &ci.italic, &ci.bold, ci.field_name);
 
     // Expect at least 10 matches (11 if field name is present)
@@ -172,7 +172,7 @@ bool Legacy::parse_rectangle(const std::string &line) {
     Component::Rectangle rect{};
 
     int res = std::sscanf(line.c_str(), "S %d %d %d %d %d %d %d %c",
-                          &rect.startx, &rect.starty, &rect.endx, &rect.endy,
+                          &rect.start_x, &rect.start_y, &rect.end_x, &rect.end_y,
                           &rect.unit, &rect.convert,
                           &rect.thickness, &rect.background);
 
@@ -225,7 +225,7 @@ bool Legacy::parse_circle(const std::string &line) {
     Component::Circle circle{};
 
     int res = sscanf(line.c_str(), "C %d %d %d %d %d %d %c",
-                     &circle.posx, &circle.posy, &circle.radius, &circle.unit,
+                     &circle.pos_x, &circle.pos_y, &circle.radius, &circle.unit,
                      &circle.convert,
                      &circle.thickness, &circle.background);
 
@@ -247,7 +247,7 @@ bool Legacy::parse_arc(const std::string &line) {
 
     int res = sscanf(line.c_str(),
                      "A %d %d %d %d %d %d %d %d %c %d %d %d %d",
-                     &arc.posx, &arc.posy, &arc.radius, &arc.start_angle,
+                     &arc.pos_x, &arc.pos_y, &arc.radius, &arc.start_angle,
                      &arc.end_angle, &arc.part, &arc.convert, &arc.thickness,
                      &arc.background, &arc.start_point_x, &arc.start_point_y,
                      &arc.end_point_x, &arc.end_point_y);
@@ -266,7 +266,7 @@ bool Legacy::parse_text(const std::string &line) {
 
     int res = sscanf(line.c_str(),
                      "T %d %d %d %d %d %d %50s",
-                     &t.orientation, &t.posx, &t.posy, &t.dimension,
+                     &t.orientation, &t.pos_x, &t.pos_y, &t.dimension,
                      &t.unit, &t.convert, t.text);
 
     if (res != 7) {
