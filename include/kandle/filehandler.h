@@ -29,25 +29,43 @@
 #include <filesystem>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <regex>
+#include "eschema/release.hpp"
+#include "eschema/legacy.hpp"
+#include "utils.hpp"
 
 // TODO handle other OS
 
 namespace Kandle {
     class FileHandler {
+
         static bool validate_zip_file(const std::string& path);
 
-        static std::string output_directory;
+        static std::string convert_symbol(
+                const std::string& legacy_symbol_path);
 
-        static struct ComponentFilePaths {
+        static bool new_symbol_library(const std::string& path);
+
+        static bool append_to_symbol_library(const std::string& path);
+
+        static void build_library_paths(const std::string& library_name);
+
+    public:
+        struct FilePaths {
             std::string symbol;
             std::string footprint;
             std::string dmodel;
-        } component_file_paths;
+        };
 
-    public:
         static std::string unzip(const std::string& path);
 
-        static bool recursive_identify_files();
+        static FilePaths
+        recursive_extract_paths(const std::string& library_name);
+
+        static bool import_symbol(const std::string& path);
+
+        static void substitute_footprint(std::string& line);
     };
 } // namespace Kandle
 

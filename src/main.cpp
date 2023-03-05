@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
             ("f,filename", "Path to zipped (.zip) component file",
              cxxopts::value<std::string>())
 
-            ("o,output-file", "Path for converted file",
+            ("l,library", "Name of the library the component belongs to.",
              cxxopts::value<std::string>())
 
             ("h,help", "Print usage");
@@ -57,25 +57,37 @@ int main(int argc, char** argv) {
 
     if (result.count("init")) {
         Kandle::FileStructure::initialise();
+        exit(0);
+    }
+
+    if (!result.count("library")) {
+        std::cerr << "Library not provided. "
+                     "A valid library name must be provided "
+                     "(see kandle --help). "
+                     "Exiting."
+                  << std::endl;
+        exit(1);
+    }
+
+
+    if (!result.count("filename")) {
+        std::cerr << "Filename not provided. "
+                     "A valid filename name must be provided "
+                     "(see kandle --help). "
+                     "Exiting."
+                  << std::endl;
+        exit(1);
     }
 
     std::string filename;
-    Legacy legacy;
-    if (result.count("filename")) {
-        filename = result["filename"].as<std::string>();
-        Kandle::FileHandler::unzip(filename);
-        Kandle::FileHandler::recursive_identify_files();
+    std::string library_name = result["library"].as<std::string>();
 
-        //std::vector<std::string> lines =
-        //        Utils::readlines(filename);
-        //legacy.convert(lines);
-    }
-
-    //Symbol symbol;
-    //if (result.count("output-file")) {
-    //    filename = result["output-file"].as<std::string>();
-    //    symbol.new_from_legacy(&legacy, filename);
-    //}
+    filename = result["filename"].as<std::string>();
+    Kandle::FileHandler::unzip(filename);
+    Kandle::FileHandler::FilePaths files =
+            Kandle::FileHandler::recursive_extract_paths(library_name);
+    Kandle::FileHandler::import_symbol(files.symbol);
+    //Kandle::FileHandler::convert_symbol(files.symbol);
 
     return 0;
 }

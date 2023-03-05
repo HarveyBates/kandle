@@ -24,9 +24,13 @@
 
 #include "eschema/release.hpp"
 
-bool Symbol::new_from_legacy(Legacy *legacy_component,
-                             const std::string &filename) {
+bool Symbol::new_from_legacy(Legacy* legacy_component,
+                             const std::string& filename) {
     output_filename = filename;
+
+    // Clear file contents
+    std::ofstream file(filename, std::ios::out | std::ios::trunc);
+    file.close();
 
     // Each of these methods write to a file (filename)
     if (!build_header()) {
@@ -47,13 +51,14 @@ bool Symbol::new_from_legacy(Legacy *legacy_component,
     }
 
     if (!write_to_file("  )\n)")) {
+        std::cerr << "Unable to write to converted file." << std::endl;
         return false;
     }
 
     return true;
 }
 
-bool Symbol::write_to_file(const char *contents) {
+bool Symbol::write_to_file(const char* contents) {
 
     std::fstream symbolFile(output_filename,
                             std::fstream::out | std::fstream::app);
@@ -106,7 +111,7 @@ bool Symbol::build_header() {
  *   [(unit_name "UNIT_NAME")]
  * )
  */
-bool Symbol::build_symbol(Legacy *legacy_component) {
+bool Symbol::build_symbol(Legacy* legacy_component) {
     char pin_buf[AUX_BUF_SIZE]{};
     memset(buffer, 0, sizeof(buffer));
     memcpy(pin_buf, build_pins_definition(legacy_component),
@@ -127,7 +132,7 @@ bool Symbol::build_symbol(Legacy *legacy_component) {
  * @param legacy_component
  * @return
  */
-const char *Symbol::build_pins_definition(Legacy *legacy_component) {
+const char* Symbol::build_pins_definition(Legacy* legacy_component) {
     char buf[40]{};
 
     memset(aux_buffer, 0, sizeof(aux_buffer));
@@ -165,19 +170,19 @@ const char *Symbol::build_pins_definition(Legacy *legacy_component) {
  * @param legacy_component
  * @return
  */
-bool Symbol::build_properties(Legacy *legacy_component) {
+bool Symbol::build_properties(Legacy* legacy_component) {
     double pos_x, pos_y;
     char font_buf[AUX_BUF_SIZE];
     char justify_buf[AUX_BUF_SIZE];
-    const char *key;
+    const char* key;
 
     // Inbuilt keys (in order)
     const int N_INBUILT_KEYS = 4;
-    const char *keys[N_INBUILT_KEYS] = {"Reference", "Value", "Footprint",
+    const char* keys[N_INBUILT_KEYS] = {"Reference", "Value", "Footprint",
                                         "Datasheet"};
 
     int i = 0;
-    for (const auto &info: legacy_component->info) {
+    for (const auto& info: legacy_component->info) {
         memset(buffer, 0, sizeof(buffer));
 
         // Assign the key from either the 4 inbuilt keys or a special key
@@ -235,7 +240,7 @@ bool Symbol::build_properties(Legacy *legacy_component) {
  * @param info
  * @return
  */
-const char *Symbol::build_font(const int font_size,
+const char* Symbol::build_font(const int font_size,
                                const char bold,
                                const char italic) {
     double font_size_f = Utils::mils_to_millimeters(font_size);
@@ -269,8 +274,8 @@ const char *Symbol::build_font(const int font_size,
  * @param info
  * @return
  */
-const char *Symbol::build_text_justification(
-        const Component::Information *info) {
+const char* Symbol::build_text_justification(
+        const Component::Information* info) {
     memset(aux_buffer, 0, sizeof(aux_buffer));
 
     if (info->horizontal_justification != 'C') {
@@ -315,7 +320,7 @@ void Symbol::add_justification(char identifier) {
 }
 
 
-bool Symbol::build_graphics(Legacy *legacy_component) {
+bool Symbol::build_graphics(Legacy* legacy_component) {
     memset(buffer, 0, sizeof(buffer));
 
     snprintf(buffer, sizeof(buffer), "    (symbol \"%s_0_0\"",
@@ -388,12 +393,12 @@ bool Symbol::build_graphics(Legacy *legacy_component) {
  * @param polygons
  * @return
  */
-bool Symbol::build_polygons(const std::vector<Component::Polygon> &polygons) {
+bool Symbol::build_polygons(const std::vector<Component::Polygon>& polygons) {
     double x0, y0, x1, y1;
     double stroke_width;
     std::string fill;
 
-    for (const auto &polygon: polygons) {
+    for (const auto& polygon: polygons) {
         memset(aux_buffer, 0, sizeof(aux_buffer));
 
         x0 = Utils::mils_to_millimeters(polygon.x0);
@@ -434,7 +439,7 @@ bool Symbol::build_polygons(const std::vector<Component::Polygon> &polygons) {
     return true;
 }
 
-bool Symbol::build_pins(const Legacy *legacy_component) {
+bool Symbol::build_pins(const Legacy* legacy_component) {
     double pos_x, pos_y;
     std::string pin_type;
     int orientation;
@@ -443,7 +448,7 @@ bool Symbol::build_pins(const Legacy *legacy_component) {
     char font_name_buf[128];
     char font_num_buf[128];
 
-    for (const auto &pin: legacy_component->pins) {
+    for (const auto& pin: legacy_component->pins) {
         memset(buffer, 0, sizeof(buffer));
         memset(font_name_buf, 0, sizeof(font_num_buf));
         memset(font_num_buf, 0, sizeof(font_num_buf));
@@ -523,7 +528,7 @@ std::string Symbol::get_pin_type(const char identifier) {
     return pin_type;
 }
 
-Symbol::PinShape Symbol::get_pin_shape(const char *shape_buf) {
+Symbol::PinShape Symbol::get_pin_shape(const char* shape_buf) {
     PinShape pin_shape;
 
     // Pin shape not found
@@ -596,13 +601,13 @@ int Symbol::get_pin_orientation(const char identifier) {
     return angle;
 }
 
-bool Symbol::build_circles(const std::vector<Component::Circle> &circles) {
+bool Symbol::build_circles(const std::vector<Component::Circle>& circles) {
     double pos_x, pos_y;
     double radius;
     double stroke_width;
     std::string fill;
 
-    for (const auto &circle: circles) {
+    for (const auto& circle: circles) {
         memset(buffer, 0, sizeof(buffer));
 
         pos_x = Utils::mils_to_millimeters(circle.pos_x);
@@ -636,7 +641,7 @@ bool Symbol::build_circles(const std::vector<Component::Circle> &circles) {
     return true;
 }
 
-bool Symbol::build_arcs(const std::vector<Component::Arc> &arcs) {
+bool Symbol::build_arcs(const std::vector<Component::Arc>& arcs) {
     double start_x, start_y;
     double mid_x, mid_y;
     double radius;
@@ -644,7 +649,7 @@ bool Symbol::build_arcs(const std::vector<Component::Arc> &arcs) {
     double stroke_width;
     std::string fill;
 
-    for (const auto &arc: arcs) {
+    for (const auto& arc: arcs) {
         memset(buffer, 0, sizeof(buffer));
 
         start_x = Utils::mils_to_millimeters(arc.start_point_x);
@@ -686,13 +691,13 @@ bool Symbol::build_arcs(const std::vector<Component::Arc> &arcs) {
 }
 
 bool Symbol::build_rectangles(
-        const std::vector<Component::Rectangle> &rectangles) {
+        const std::vector<Component::Rectangle>& rectangles) {
     double start_x, start_y;
     double end_x, end_y;
     double stroke_width;
     std::string fill;
 
-    for (const auto &rectangle: rectangles) {
+    for (const auto& rectangle: rectangles) {
         memset(buffer, 0, sizeof(buffer));
 
         start_x = Utils::mils_to_millimeters(rectangle.start_x);
@@ -730,13 +735,13 @@ bool Symbol::build_rectangles(
 }
 
 bool Symbol::build_text_fields(
-        const std::vector<Component::Text> &text_fields) {
+        const std::vector<Component::Text>& text_fields) {
     double pos_x, pos_y;
     double rotation;
     char text_effects[128];
     std::string fill;
 
-    for (const auto &text_field: text_fields) {
+    for (const auto& text_field: text_fields) {
         memset(buffer, 0, sizeof(buffer));
         memset(text_effects, 0, sizeof(text_effects));
 
