@@ -51,6 +51,9 @@ namespace Kandle {
 
         static void build_library_paths(const std::string& library_name);
 
+        static void straight_copy(const std::string& source,
+                                  const std::string& dest);
+
     public:
         struct FilePaths {
             std::string symbol;
@@ -66,6 +69,10 @@ namespace Kandle {
         static bool import_symbol(const std::string& path);
 
         static void substitute_footprint(std::string& line);
+
+        static bool import_footprint(const std::string& path);
+
+        static bool import_3dmodel(const std::string& path);
     };
 } // namespace Kandle
 

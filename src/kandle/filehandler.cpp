@@ -344,4 +344,71 @@ bool Kandle::FileHandler::import_symbol(const std::string& path) {
     return append_to_symbol_library(path);
 }
 
+void Kandle::FileHandler::straight_copy(const std::string& source,
+                                        const std::string& dest) {
+    std::ifstream source_file(source, std::ios::binary);
+    std::ofstream dest_file(dest, std::ios::binary);
+
+    if (!source_file) {
+        std::cerr << "Unable to open file: " << source << std::endl;
+        exit(1);
+    }
+
+    if (!dest_file) {
+        std::cerr << "Unable to write to file: " << dest << std::endl;
+        exit(1);
+    }
+
+    dest_file << source_file.rdbuf();
+}
+
+bool Kandle::FileHandler::import_footprint(const std::string& path) {
+
+    std::string component_path;
+
+    // No footprint library found
+    if (std::empty(path)) {
+        return false;
+    }
+
+    // Create library directory if it doesn't exist
+    if (!exists(fs::path(library_file_paths.footprint))) {
+        fs::create_directories(library_file_paths.footprint);
+    }
+
+    component_path += library_file_paths.footprint;
+    component_path += "/";
+    component_path += fs::path(output_directory).filename();
+    component_path += ".kicad_mod";
+
+    straight_copy(path, component_path);
+
+    return true;
+}
+
+bool Kandle::FileHandler::import_3dmodel(const std::string& path) {
+
+    std::string component_path;
+
+    // No 3dmodel library found
+    if (std::empty(path)) {
+        return false;
+    }
+
+    // Create library directory if it doesn't exist
+    if (!exists(fs::path(library_file_paths.dmodel))) {
+        fs::create_directories(library_file_paths.dmodel);
+    }
+
+    component_path += library_file_paths.dmodel;
+    component_path += "/";
+    component_path += fs::path(output_directory).filename();
+    component_path += fs::path(path).extension();
+
+    straight_copy(path, component_path);
+
+    return true;
+}
+
+
 

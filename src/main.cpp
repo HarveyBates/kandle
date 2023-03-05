@@ -84,10 +84,13 @@ int main(int argc, char** argv) {
 
     filename = result["filename"].as<std::string>();
     Kandle::FileHandler::unzip(filename);
+
     Kandle::FileHandler::FilePaths files =
             Kandle::FileHandler::recursive_extract_paths(library_name);
+
     Kandle::FileHandler::import_symbol(files.symbol);
-    //Kandle::FileHandler::convert_symbol(files.symbol);
+    Kandle::FileHandler::import_footprint(files.footprint);
+    Kandle::FileHandler::import_3dmodel(files.dmodel);
 
     return 0;
 }

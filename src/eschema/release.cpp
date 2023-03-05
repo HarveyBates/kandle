@@ -628,7 +628,7 @@ bool Symbol::build_circles(const std::vector<Component::Circle>& circles) {
 
         snprintf(buffer,
                  sizeof(buffer),
-                 "      (circle (center %.3f %.3f) (radius %.3f))"
+                 "      (circle (center %.3f %.3f) (radius %.3f)\n"
                  "        (stroke (width %.3f) (type default))"
                  " (fill (type %s))\n"
                  "      )", pos_x, pos_y, radius, stroke_width, fill.c_str());
