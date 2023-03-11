@@ -380,6 +380,23 @@ bool Symbol::build_graphics(Legacy* legacy_component) {
     return true;
 }
 
+std::string Symbol::build_polygon_points(
+        const std::vector<std::tuple<int, int>>& coords) {
+    double x, y;
+    std::string ret;
+    char buf[50];
+
+    for (const auto& c: coords) {
+        memset(buf, 0, sizeof(buf));
+        x = Utils::mils_to_millimeters(std::get<0>(c));
+        y = Utils::mils_to_millimeters(std::get<1>(c));
+        snprintf(buf, sizeof(buf), "          (xy %.3f %.3f)\n", x, y);
+        ret += buf;
+    }
+
+    return ret;
+}
+
 /**
  * @brief Adds polygons from legacy component into a .kicad_sym file.
  *
@@ -394,17 +411,14 @@ bool Symbol::build_graphics(Legacy* legacy_component) {
  * @return
  */
 bool Symbol::build_polygons(const std::vector<Component::Polygon>& polygons) {
-    double x0, y0, x1, y1;
     double stroke_width;
     std::string fill;
+    std::string polygon_pts;
 
     for (const auto& polygon: polygons) {
         memset(aux_buffer, 0, sizeof(aux_buffer));
 
-        x0 = Utils::mils_to_millimeters(polygon.x0);
-        y0 = Utils::mils_to_millimeters(polygon.y0);
-        x1 = Utils::mils_to_millimeters(polygon.x1);
-        y1 = Utils::mils_to_millimeters(polygon.y1);
+        polygon_pts = build_polygon_points(polygon.coords);
         stroke_width = Utils::mils_to_millimeters(polygon.thickness);
 
         switch (polygon.background) {
@@ -422,13 +436,12 @@ bool Symbol::build_polygons(const std::vector<Component::Polygon>& polygons) {
                  sizeof(aux_buffer),
                  "      (polyline\n"
                  "        (pts\n"
-                 "          (xy %.3f %.3f)\n"
-                 "          (xy %.3f %.3f)\n"
+                 "%s"
                  "        )\n"
                  "        (stroke (width %.3f) (type default))\n"
                  "        (fill (type %s))\n"
                  "      )",
-                 x0, y0, x1, y1, stroke_width, fill.c_str());
+                 polygon_pts.c_str(), stroke_width, fill.c_str());
 
         // Write polygon to file
         if (!write_to_file(aux_buffer)) {

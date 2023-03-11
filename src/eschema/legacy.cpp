@@ -189,6 +189,22 @@ bool Legacy::parse_rectangle(const std::string& line) {
     return true;
 }
 
+std::vector<std::tuple<int, int>> Legacy::extract_polygon_coords(
+        const std::string& line, const int n_coords) {
+
+    std::vector<std::tuple<int, int>> coords;
+    std::stringstream ss(line);
+
+    for (int i = 0; i < n_coords; i++) {
+        int x, y;
+        ss >> x >> y;
+        coords.emplace_back(x, y);
+    }
+
+    return coords;
+}
+
+
 //Example:
 //
 // P 3 0 1 0 -50 50 50 0 -50 -50 F
@@ -197,28 +213,22 @@ bool Legacy::parse_rectangle(const std::string& line) {
 bool Legacy::parse_polygon(const std::string& line) {
     Component::Polygon polygon{};
 
-    int res = std::sscanf(line.c_str(), "P %d %d %d %d %d %d %d %d %d %d %c",
-                          &polygon.n_points, &polygon.parts, &polygon.convert,
-                          &polygon.thickness, &polygon.x0, &polygon.y0,
-                          &polygon.x1,
-                          &polygon.y1, &polygon.xi, &polygon.yi,
-                          &polygon.background);
+    // Get polygon details
+    int res = std::sscanf(line.c_str(), "P %d %d %d %d", &polygon.n_points,
+                          &polygon.parts, &polygon.convert, &polygon.thickness);
 
-    if (res != 11) {
-        // Retry without xi and yi
-        res = std::sscanf(line.c_str(), "P %d %d %d %d %d %d %d %d %c",
-                          &polygon.n_points, &polygon.parts, &polygon.convert,
-                          &polygon.thickness,
-                          &polygon.x0, &polygon.y0, &polygon.x1, &polygon.y1,
-                          &polygon.background);
-
-        polygon.xi = 0;
-        polygon.yi = 0;
-
-        if (res != 9) {
-            return false;
-        }
+    if (res != 4) {
+        return false;
     }
+
+    // Split after the polygon details (still has trailing background char)
+    std::string coords_only = Utils::split_string_nth_space(line, 5);
+
+    // Get the x, y coords of each part of the polygon
+    polygon.coords = extract_polygon_coords(coords_only, polygon.n_points);
+
+    // Last char is the background identifier
+    polygon.background = line[-1];
 
     polygons.push_back(polygon);
 
