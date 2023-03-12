@@ -19,7 +19,7 @@ set(CMAKE_CXX_STANDARD 17)
 # find_package(CURL REQUIRED)
 
 # Specify executable
-add_executable(${PROJECT_NAME} ${SRC_DIR} ${INC_DIR} src/kandle/filestructure.cpp include/kandle/filestructure.h src/kandle/filehandler.cpp include/kandle/filehandler.h)
+add_executable(${PROJECT_NAME} ${SRC_DIR} ${INC_DIR})
 
 # Add flags to compilation
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
@@ -33,3 +33,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Link required libraries if specified in find_package()
 target_link_libraries(${PROJECT_NAME})
+
+# Optional, install to /usr/local/bin/kandle (UNIX) or Program Files (Windows)
+install(TARGETS ${PROJECT_NAME})

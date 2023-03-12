@@ -767,10 +767,8 @@ bool Symbol::build_text_fields(
 
         snprintf(buffer,
                  sizeof(buffer),
-                 "      (text\n"
-                 "        \"%s\"\n"
-                 "        (at %.3f %.3f %.3f)\n"
-                 "        (effects %s"
+                 "      (text \"%s\" (at %.3f %.3f %.3f)\n"
+                 "        (effects %s)\n"
                  "      )",
                  text_field.text, pos_x, pos_y, rotation, text_effects);
 
