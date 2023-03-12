@@ -114,10 +114,12 @@ Kandle::FileHandler::FilePaths Kandle::FileHandler::recursive_extract_paths(
             output_directory}) {
         auto item = fs::path(dir_item);
 
-        if (!std::empty(component_file_paths.symbol) &&
-            !std::empty(component_file_paths.footprint) &&
-            !std::empty(component_file_paths.dmodel)) {
-            return component_file_paths;
+        if (item.stem() == "KiCad") {
+            std::cout << "Component Search Engine component detected."
+                      << std::endl;
+            symbol_found = false;
+            footprint_found = false;
+            dmodel_found = false;
         }
 
         if (!symbol_found && item.extension() == ".kicad_sym") {
@@ -125,6 +127,7 @@ Kandle::FileHandler::FilePaths Kandle::FileHandler::recursive_extract_paths(
             component_file_paths.symbol = item;
             symbol_found = true;
         }
+
         if (!symbol_found && item.extension() == ".lib") {
             std::string symbol_path = item;
             component_file_paths.symbol = convert_symbol(symbol_path);
