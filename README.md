@@ -4,7 +4,7 @@
 
 ## What is it?
 
-A CLI that automatically imports external components into a KiCad project.
+A CLI that handles external components in a KiCad project.
 
 It supports files downloaded from several vendors such as:
 
