@@ -2,13 +2,9 @@
 
 ![tests_badge](https://github.com/HarveyBates/kicad-component-handler/actions/workflows/tests.yml/badge.svg)
 
-> **Warning**
-> Major update coming soon which will dramatically change how this CLI works.
-> Stay tuned...
-
 ## What is it?
 
-A CLI that automatically imports external components into a KiCad project.
+A CLI that handles external components in a KiCad project.
 
 It supports files downloaded from several vendors such as:
 
@@ -16,8 +12,12 @@ It supports files downloaded from several vendors such as:
 - [x] [Ultra Librarian](https://www.ultralibrarian.com/)
 - [x] [Component Search Engine](https://componentsearchengine.com/library/kicad)
 
-The CLI will automatically extract, rename, and link these components to your
-project. So all you have to do is place on your schematic or PCB.
+The CLI will:
+- [x] Handle the unzipping of files downloaded from the above providers.
+- [x] Place symbols, footprints and models in a define directory structure.
+- [x] Convert KiCad v4 symbols (`.lib` files) to KiCad v6 symbols (`.kicad_sym` files).
+- [x] Link a symbol and footprint automatically.
+- [x] Automaticlly import the symbol **if a symbol library for that component exists* (same goes for the footprint)
 
 ## See it in action [here](https://www.youtube.com/watch?v=N1Pj9GHJTcU/&t=610s)
 
@@ -28,10 +28,13 @@ project. So all you have to do is place on your schematic or PCB.
 Download repository
 
 ```bash
-git clone https://github.com/HarveyBates/kicad-component-handler
-cd kicad-component-handler
-chmod a+x kandle.sh # Modify permissions to make the script executable
-export PATH=$PATH:$PWD/src # Add the script to your PATH (this allows you to run it from any directory)
+git clone https://github.com/HarveyBates/kandle
+cd kandle
+mkdir build
+cd build
+cmake ..
+make
+make install # (optional, if not you need to add kandle/build/bin to your path)
 ```
 
 If you want to permanently add the script to your path here is
@@ -39,24 +42,18 @@ a [tutorial](https://appuals.com/how-to-make-a-program-executable-from-everywher
 
 ## Usage
 
-> **Warning**
-> This project currently overwrites your cached 3rd-party symbol and footprint
-> tables (only project specific). If you have an existing project that has
-> third party components you will need to migrate to Kandle's directory structure
-> before running `kandle.sh -R`.
-
 ### Step 1
 
 In your terminal navigae to your KiCAD project. You want to be in the same
 directory as your `.kicad_pro` file. If not you will get an error message
-saying "*No KiCad project exists in current directory.*".
+saying "*KiCad project not found in current working directory. Exiting.*".
 
 ### Step 2
 
 Setup (initialise) the directory structure.
 
 ```bash
-kandle -i
+kandle -I
 ```
 
 This will result in a directory structure like this:
@@ -65,10 +62,10 @@ This will result in a directory structure like this:
 your_kicad_project/
 ├─ components/
 │  ├─ extern/
-│  │  ├─ 3d_models/
+│  │  ├─ 3dmodels/
 │  │  ├─ footprints/
 │  │  ├─ symbols/
-│  │  ├─ tmp/ <--- downloaded .zip files go here
+│  │  ├─ tmp/ <--- unzipped files will be stored here
 ├─ fp-info-table
 ├─ sym-info-table
 ├─ project.kicad_pcb
@@ -78,94 +75,47 @@ your_kicad_project/
 
 ### Step 3
 
-Download a component from the above supported vendors. Place the `.zip` file in
-the `components/extern/tmp` directory. It's your choice, but its good idea to
-rename the `.zip` file with the component name and underscores instead of
-spaces or dashes.
+Download a component from the above supported vendors. Rename the `.zip` file with the component name.
 
 > **Example:**
-> If the filename is `PESD 0402-140.zip` rename it to `PESD_0402_140.zip`. This
-> will allow you to skip renaming it later and I think its more robust to not
-> have spaces in filenames.
+> If the filename is `PESD 0402-140.zip` rename it to `PESD_0402-140.zip`.
 
 ### Step 4
 
-From within the project directory run this command to unpack the .zip file
-download above into respective
-directories. This will use the filename as the component name.
+Execute kandle passing the file you just downloaded and the library the part belongs to. 
+
+> **Example:**
+> If the part is an operational amplifier called LM358 stored in your `Downloads` directory. 
+> Your command would look like this:
+> `kandle -f Downloads/LM358.zip -l operational_amplifier`
 
 ```bash
-kandle -t <type_of_your_component> -f <your_download_file_name>.zip
+kandle -f <your_download_file_name>.zip -l <library_name>
 ```
-
-**Or**, you can specify the part name using the command (if you didn't change
-the filename above):
-
-```bash
-kandle -t <type_of_your_component> -n <name_of_your_component> -f <your_download_file_name>.zip
-```
-
-> **Note:**
-> The current version has a limitation where the depth of component type can
-> only be one level. For example, you can use the component type of `op_amp` but
-> you cant use `op_amp/rail_to_rail`.
-
 ### Step 5
+Open Eeschema -> Preferences -> Manage Symbol Libraries -> Project Specific Libraries -> Add existing.
 
-Then, refresh cached symbol and footprint tables (sym-info-table &
-fp-info-table)
-
-```bash
-kandle -R
-```
-
-You can check the allocation of your new component by:
-
-```bash
-kandle -l
-```
-
-Which will output something like this depending on your installed 3rd-party
-components:
-
-```
-|- battery_holder/
-  |- 1043
-  |- 1048P
-|- op_amp/
-  |- LM358
-  |- LM359M
-|- regulator/
-  |- LM350T
-```
+Using the above example, you would import the file `components/extern/symbols/operational_amplifier.kicad_sym`.
 
 ### Step 6
+Open PCBnew -> Preferences -> Manage Footprint Libraries -> Add existing. 
 
-To refresh your project components you need to close your KiCad project and
-open it again.
+Using the above example, you would import the file `components/extern/footprints/operational_amplifier.pretty`.
 
-### Step 7
-
-The component will now be in your symbols and footprint searches. `Extern_`
-will be appended to the start of each component's name so they are seperate
-from other components and easy to find. The component symbol and footprint will
-be automatically linked to each other.
+### Step 7 
+Place on schematic in Eeschema. In the above example you would search for `operational_amplifier` and then select LM358. The symbol should already be linked to the footprint.
 
 ## Help
 
 ```
-kandle - Handle 3rd-party KiCAD components.
- 
-kandle [options] application [arguments]
- 
-options:
--h                      Show help information.
--i      (optional)      Initialise directory structure.
--l      (optional)      List installed components and their type.
--n      (optional)      Component name. Defaults to filename (without extension).
--R      (optional)      Refresh cached symbol and footprint tables.
--t      (required)      Component type. E.g. op_amp, button etc.
--f      (required)      Filename. Name of file in /tmp directory you want to extract.
+KiCAD 3rd Party Component Management Tool
+Usage:
+  kandle [OPTION...]
+
+  -I, --init          Initialise a KiCAD project with Kandle
+  -f, --filename arg  Path to zipped (.zip) component file
+  -l, --library arg   Name of the library the component belongs to.
+  -h, --help          Print usage
 ```
 
 ## Found a problem
