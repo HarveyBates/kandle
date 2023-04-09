@@ -1,7 +1,5 @@
 # Kandle (KiCAD Component Handler)
 
-![tests_badge](https://github.com/HarveyBates/kicad-component-handler/actions/workflows/tests.yml/badge.svg)
-
 ## What is it?
 
 A CLI that handles external components in a KiCad project.
@@ -19,9 +17,9 @@ The CLI will:
 - [x] Link a symbol and footprint automatically.
 - [x] Automaticlly import the symbol **if a symbol library for that component exists* (same goes for the footprint)
 
-## See it in action [here](https://www.youtube.com/watch?v=N1Pj9GHJTcU/&t=610s)
+## See it in action [here](https://www.youtube.com/watch?v=nRz4pBlJtNc/&t=120s)
 
-[![Video](https://img.youtube.com/vi/N1Pj9GHJTcU/mqdefault.jpg)](https://www.youtube.com/watch?v=N1Pj9GHJTcU/&t=610s)
+[![Video](https://img.youtube.com/vi/nRz4pBlJtNc/mqdefault.jpg)](https://www.youtube.com/watch?v=nRz4pBlJtNc/&t=120s)
 
 ## Installation
 
@@ -112,10 +110,11 @@ KiCAD 3rd Party Component Management Tool
 Usage:
   kandle [OPTION...]
 
-  -I, --init          Initialise a KiCAD project with Kandle
-  -f, --filename arg  Path to zipped (.zip) component file
+  -I, --init          Initialise a KiCAD project with Kandle.
+  -L, --list          List existing component libraries.
+  -f, --filename arg  Path to zipped (.zip) component file.
   -l, --library arg   Name of the library the component belongs to.
-  -h, --help          Print usage
+  -h, --help          Help information.
 ```
 
 ## Found a problem
