@@ -32,19 +32,21 @@ int main(int argc, char** argv) {
                              "KiCAD 3rd Party Component Management Tool");
 
     options.add_options()
-            ("I,init", "Initialise a KiCAD project with Kandle",
+            ("I,init", "Initialise a KiCAD project with Kandle.",
              cxxopts::value<bool>())
 
-            ("f,filename", "Path to zipped (.zip) component file",
-             cxxopts::value<std::string>())
-
-            ("l,library", "Name of the library the component belongs to.",
-             cxxopts::value<std::string>())
-
-            ("L,list", "List existing libraries.",
+            ("L,list", "List existing component libraries.",
              cxxopts::value<bool>())
 
-            ("h,help", "Print usage");
+            ("f,filename", "Path to zipped (.zip) component file (from "
+                           "symbol vendors).",
+             cxxopts::value<std::string>())
+
+            ("l,library", "Name of the library the component belongs to. "
+                          "E.g. op-amps for an LM358 IC.",
+             cxxopts::value<std::string>())
+
+            ("h,help", "Help information.");
 
     auto result = options.parse(argc, argv);
 
