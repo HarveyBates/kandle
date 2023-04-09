@@ -43,7 +43,6 @@ bool Kandle::FileStructure::validate_directory() {
     for (const auto& dir_item: fs::directory_iterator{path}) {
         auto item = fs::path(dir_item);
         if (item.extension() == ".kicad_pro") {
-            std::cout << "Target project: " << item.filename() << std::endl;
             return true;
         }
     }
@@ -95,7 +94,7 @@ void Kandle::FileStructure::list() {
     for (const auto& dir_item: fs::directory_iterator{path}) {
         auto item = fs::path(dir_item);
         if (item.extension() == ".kicad_sym") {
-            std::cout << item.filename() << std::endl;
+            std::cout << item.stem().string() << std::endl;
             count++;
         }
     }
