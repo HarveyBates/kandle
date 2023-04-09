@@ -24,9 +24,6 @@
 
 #include <iostream>
 #include <cxxopts.hpp>
-#include "utils.hpp"
-#include "eschema/legacy.hpp"
-#include "eschema/release.hpp"
 #include "kandle/filestructure.h"
 #include "kandle/filehandler.h"
 
@@ -44,6 +41,9 @@ int main(int argc, char** argv) {
             ("l,library", "Name of the library the component belongs to.",
              cxxopts::value<std::string>())
 
+            ("L,list", "List existing libraries.",
+             cxxopts::value<std::string>())
+
             ("h,help", "Print usage");
 
     auto result = options.parse(argc, argv);
@@ -54,6 +54,11 @@ int main(int argc, char** argv) {
     }
 
     Kandle::FileStructure::validate_directory();
+
+    if (result.count("list")) {
+        Kandle::FileStructure::list();
+        exit(0);
+    }
 
     if (result.count("init")) {
         Kandle::FileStructure::initialise();

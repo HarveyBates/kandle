@@ -41,6 +41,8 @@ namespace Kandle {
         static bool validate_directory();
 
         static bool initialise();
+
+        static void list();
     };
 } // namespace Kandle
 

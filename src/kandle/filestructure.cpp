@@ -85,3 +85,23 @@ bool Kandle::FileStructure::initialise() {
 
     return true;
 }
+
+void Kandle::FileStructure::list() {
+    int count = 0;
+
+    std::string path = fs::current_path();
+    path += "/components/extern/symbols";
+
+    for (const auto& dir_item: fs::directory_iterator{path}) {
+        auto item = fs::path(dir_item);
+        if (item.extension() == ".kicad_sym") {
+            std::cout << item.filename() << std::endl;
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        std::cout << "No libraries found." << std::endl;
+        exit(1);
+    }
+}
