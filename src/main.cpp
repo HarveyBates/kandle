@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
              cxxopts::value<std::string>())
 
             ("L,list", "List existing libraries.",
-             cxxopts::value<std::string>())
+             cxxopts::value<bool>())
 
             ("h,help", "Print usage");
 
