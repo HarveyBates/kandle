@@ -32,8 +32,8 @@ public:
 
     // This information comes from the "DEF" identifier
     struct Definition {
-        char name[UINT8_MAX]{};
-        char reference[UINT8_MAX]{};
+        char name[255]{};
+        char reference[255]{};
         int pin_name_offset{};
         char show_pin_number{};
         char show_pin_name{};
@@ -43,7 +43,7 @@ public:
 
     // This comes from F0 ... Fn
     struct Information {
-        char text[UINT8_MAX]{};
+        char text[255]{};
         int pos_x{};
         int pos_y{};
         int dimension{};
@@ -54,7 +54,7 @@ public:
         char vertical_justification{};
         char italic{};
         char bold{};
-        char field_name[UINT8_MAX]{};
+        char field_name[255]{};
     };
 
     enum PinElectricalType : char {
@@ -72,7 +72,7 @@ public:
     };
 
     struct Pin {
-        char name[UINT8_MAX]{};
+        char name[255]{};
         char number[4]{};
         int pos_x;
         int pos_y;
@@ -140,6 +140,6 @@ public:
         int dimension;
         int unit;
         int convert;
-        char text[UINT8_MAX]{};
+        char text[255]{};
     };
 };

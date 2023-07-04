@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.19.0)
 
+# Set C standard to use
+set(CMAKE_CXX_STANDARD 17)
+
 project("kandle")
 
 # All files in source directory
@@ -11,12 +14,6 @@ file(GLOB_RECURSE INC_DIR RELATIVE ${CMAKE_SOURCE_DIR} include/*.hpp)
 # Set output directories
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-# Set C standard to use
-set(CMAKE_CXX_STANDARD 17)
-
-# Set required packages
-# find_package(CURL REQUIRED)
 
 # Specify executable
 add_executable(${PROJECT_NAME} ${SRC_DIR} ${INC_DIR})
