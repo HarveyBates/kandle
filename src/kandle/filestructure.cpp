@@ -26,7 +26,7 @@
 
 namespace fs = std::filesystem;
 
-static const std::vector<const std::string> dirs = {
+static const std::vector<std::string> dirs = {
         "components",
         "components/extern",
         "components/extern/symbols",
@@ -41,7 +41,7 @@ bool Kandle::FileStructure::validate_directory() {
     std::string path = fs::current_path();
 
     for (const auto& dir_item: fs::directory_iterator{path}) {
-        auto item = fs::path(dir_item);
+        const auto item = fs::path(dir_item);
         if (item.extension() == ".kicad_pro") {
             return true;
         }

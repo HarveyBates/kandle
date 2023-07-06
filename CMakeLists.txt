@@ -21,7 +21,8 @@ add_executable(${PROJECT_NAME} ${SRC_DIR} ${INC_DIR})
 # Add flags to compilation
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 target_compile_options(${PROJECT_NAME} PRIVATE -pedantic)
-target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+# target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+
 # Colored output for logs
 target_compile_options(${PROJECT_NAME} PRIVATE -DLOG_USE_COLOR)
 

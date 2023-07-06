@@ -29,9 +29,6 @@
 #include <vector>
 #include <string>
 
-static const char* KICAD_VERSION = "20211014";
-static const char* KICAD_GENERATOR = "kicad_symbol_editor";
-
 class Utils {
 public:
     static std::vector<std::string> readlines(
