@@ -36,7 +36,23 @@ std::string Kandle::FileHandler::unzip(const std::string& path) {
     std::cout << "Extracting from: " << path << std::endl;
 
     std::string output_path = "components/extern/tmp/";
-    output_path += fs::path(path).stem(); // Gets the filename only
+    std::string filename = fs::path(path).stem();
+
+    // Remove ultra-librarian prefix
+    if (filename.substr(0, 3) == "ul_") {
+      filename = filename.substr(3);
+    }
+
+    // Remove CSE prefix
+    if (filename.substr(0, 4) == "LIB_") {
+      filename = filename.substr(4);
+    }
+
+    // Replace spaces and - with _
+    std::replace(filename.begin(), filename.end(), ' ', '_');
+    std::replace(filename.begin(), filename.end(), '-', '_');
+
+    output_path += filename; // Add new filename to path
 
     std::cout << "Extracting to: " << output_path << std::endl;
 
@@ -365,6 +381,25 @@ void Kandle::FileHandler::straight_copy(const std::string& source,
     dest_file << source_file.rdbuf();
 }
 
+void Kandle::FileHandler::constrain_footprint_text(std::string& line) {
+    int idx = 0;
+    int offset = 0;
+    std::string font_text[3] = {"1", "1", "0.15"};
+    std::regex re(R"(\d+(\.\d+)?)");
+    std::smatch match;
+
+    while(std::regex_search(line.cbegin() + offset, line.cend(), match, re)) {
+        if (idx >= 3) { return; }
+        int match_pos = (int)match.position() + offset;
+
+        line.replace(match_pos, match.length(), font_text[idx]);
+
+        offset = match_pos + (int)font_text[idx].length();
+        idx++;
+    }
+}
+
+
 bool Kandle::FileHandler::import_footprint(const std::string& path) {
 
     std::string component_path;
@@ -379,12 +414,38 @@ bool Kandle::FileHandler::import_footprint(const std::string& path) {
         fs::create_directories(library_file_paths.footprint);
     }
 
+    std::vector<std::string> lines = Utils::readlines(path);
+
     component_path += library_file_paths.footprint;
     component_path += "/";
     component_path += fs::path(output_directory).filename();
     component_path += ".kicad_mod";
 
     straight_copy(path, component_path);
+
+    // Open newly copied files
+    std::fstream footprint_file(component_path, std::fstream::out);
+
+    if (!footprint_file.is_open()) {
+        std::cerr << "Cannot open footprint file." << std::endl;
+        return false;
+    }
+
+    // Find font and replace font size
+    for (auto& line : lines) {
+      if (std::empty(line)) {
+        continue;
+      }
+
+      // Replace font size with default font size
+      if (line.find("(effects (font (size ") != std::string::npos) {
+        constrain_footprint_text(line);
+      }
+
+      footprint_file << line << "\n";
+    }
+
+    footprint_file.close();
 
     return true;
 }

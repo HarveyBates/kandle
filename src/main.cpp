@@ -28,7 +28,7 @@
 #include "kandle/filehandler.h"
 
 int main(int argc, char** argv) {
-    cxxopts::Options options("kandle",
+    cxxopts::Options options("Kandle",
                              "KiCAD 3rd Party Component Management Tool");
 
     options.add_options()
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
                           "E.g. op-amps for an LM358 IC.",
              cxxopts::value<std::string>())
 
-            ("h,help", "Help information.");
+            ("h,help", "Display help information.");
 
     auto result = options.parse(argc, argv);
 

@@ -61,6 +61,8 @@ namespace Kandle {
             std::string dmodel;
         };
 
+        static void constrain_footprint_text(std::string& line);
+
         static std::string unzip(const std::string& path);
 
         static FilePaths
