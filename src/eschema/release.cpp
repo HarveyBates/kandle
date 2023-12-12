@@ -86,6 +86,8 @@ bool Symbol::write_to_file(const char* contents) {
  */
 bool Symbol::build_header() {
     memset(buffer, 0, sizeof(buffer));
+    const char* KICAD_VERSION = "20211014";
+    const char* KICAD_GENERATOR = "kicad_symbol_editor";
 
     // Note, closing bracket is added at a later stage
     snprintf(buffer, sizeof(buffer), "(kicad_symbol_lib "

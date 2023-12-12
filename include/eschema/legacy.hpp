@@ -30,6 +30,8 @@
 #include <vector>
 #include <tuple>
 #include <cstdio>
+#include <iterator>
+#include <cstring>
 
 #include "eschema/component.hpp"
 #include "eschema/config.hpp"
