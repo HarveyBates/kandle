@@ -73,10 +73,11 @@ your_kicad_project/
 
 ### Step 3
 
-Download a component from the above supported vendors. Rename the `.zip` file with the component name.
+Download a component from the above supported vendors. No need to rename the `.zip` file. 
+Kandle will remove "ul_" (from Ultra-Librarian) and "LIB_" (from CSE). It will also replace all `-` or `spaces` with `_`.
 
 > **Example:**
-> If the filename is `PESD 0402-140.zip` rename it to `PESD_0402-140.zip`.
+> If the filename is `LIB_PESD 0402-140.zip` it will become `PESD_0402_140`.
 
 ### Step 4
 
@@ -99,6 +100,9 @@ Using the above example, you would import the file `components/extern/symbols/op
 Open PCBnew -> Preferences -> Manage Footprint Libraries -> Add existing. 
 
 Using the above example, you would import the file `components/extern/footprints/operational_amplifier.pretty`.
+
+> **Attention**
+> Kandle will automatically change default text size of footprint names to 1 with a thickness of 0.15 (KiCAD defaults).
 
 ### Step 7 
 Place on schematic in Eeschema. In the above example you would search for `operational_amplifier` and then select LM358. The symbol should already be linked to the footprint.
