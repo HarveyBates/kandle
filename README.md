@@ -21,6 +21,8 @@ The CLI will:
 
 [![Video](https://img.youtube.com/vi/nRz4pBlJtNc/mqdefault.jpg)](https://www.youtube.com/watch?v=nRz4pBlJtNc/&t=120s)
 
+Or see an [example project](https://github.com/HarveyBates/u-nit/tree/main/electronics/u-nit/components/extern).
+
 ## Installation
 
 Download repository
