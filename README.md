@@ -12,10 +12,10 @@ It supports files downloaded from several vendors such as:
 
 The CLI will:
 - [x] Handle the unzipping of files downloaded from the above providers.
-- [x] Place symbols, footprints and models in a define directory structure.
+- [x] Place symbols, footprints and models in a defined directory structure.
 - [x] Convert KiCad v4 symbols (`.lib` files) to KiCad v6 symbols (`.kicad_sym` files).
 - [x] Link a symbol and footprint automatically.
-- [x] Automaticlly import the symbol **if a symbol library for that component exists* (same goes for the footprint)
+- [x] Automatically import the symbol **if a symbol library for that component exists* (same goes for the footprint)
 
 ## See it in action [here](https://www.youtube.com/watch?v=nRz4pBlJtNc/&t=120s)
 
@@ -44,7 +44,7 @@ a [tutorial](https://appuals.com/how-to-make-a-program-executable-from-everywher
 
 ### Step 1
 
-In your terminal navigae to your KiCAD project. You want to be in the same
+In your terminal navigate to your KiCAD project. You want to be in the same
 directory as your `.kicad_pro` file. If not you will get an error message
 saying "*KiCad project not found in current working directory. Exiting.*".
 
@@ -75,7 +75,7 @@ your_kicad_project/
 
 ### Step 3
 
-Download a component from the above supported vendors. No need to rename the `.zip` file. 
+Download a component from the supported vendors (as above). There is no need to rename the `.zip` file, unless you would like a alternative name. 
 Kandle will remove "ul_" (from Ultra-Librarian) and "LIB_" (from CSE). It will also replace all `-` or `spaces` with `_`.
 
 > **Example:**
@@ -107,7 +107,9 @@ Using the above example, you would import the file `components/extern/footprints
 > Kandle will automatically change default text size of footprint names to 1 with a thickness of 0.15 (KiCAD defaults).
 
 ### Step 7 
-Place on schematic in Eeschema. In the above example you would search for `operational_amplifier` and then select LM358. The symbol should already be linked to the footprint.
+Place on your Eeschema schematic. In the above example, you would search for `operational_amplifier` and then select LM358. The symbol should already be linked to the footprint. 
+
+All future symbols and footprints of type `operational_amplifier` will appear automatically so there is no need to repeat *Step 5* again!
 
 ## Help
 
