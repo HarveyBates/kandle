@@ -2,7 +2,7 @@
 
 ## What is it?
 
-A CLI that handles external components in a KiCad project.
+A CLI that handles external components in a KiCad project by automatically importing them into your project symbol, footprint and 3d-model libraries.
 
 It supports files downloaded from several vendors such as:
 
