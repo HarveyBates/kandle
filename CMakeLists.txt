@@ -5,6 +5,19 @@ set(CMAKE_CXX_STANDARD 17)
 
 project("kandle")
 
+# ZSH system (for tab auto-completions)
+find_program(ZSH_PROGRAM zsh)
+if (ZSH_PROGRAM)
+    # Install zsh tab completions
+    set(ZSH_COMPLETION_DIR "/usr/local/share/zsh/site-functions/")
+
+    message("Installing zsh auto-completions at: " ${ZSH_COMPLETION_DIR})
+
+    # Install auto-completions
+    install(FILES "kandle_autocomplete.zsh" DESTINATION ${ZSH_COMPLETION_DIR}
+            RENAME "_kandle")
+endif()
+
 # All files in source directory
 file(GLOB_RECURSE SRC_DIR RELATIVE ${CMAKE_SOURCE_DIR} src/*.cpp)
 
