@@ -61,6 +61,9 @@ namespace Kandle {
             std::string dmodel;
         };
 
+        static bool save_zip(const std::string& zip_path,
+                             std::string kandle_path);
+
         static void constrain_footprint_text(std::string& line);
 
         static std::string unzip(const std::string& path);

@@ -27,3 +27,9 @@ test/test_project/test_project-backups/
 # Bats-core directories (tests)
 /test/bats
 /test/test_helper
+
+# Global libraries
+components/
+
+# Kandle cached files
+saved/

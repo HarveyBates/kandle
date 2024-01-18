@@ -29,6 +29,57 @@ namespace fs = std::filesystem;
 std::string output_directory;
 static Kandle::FileHandler::FilePaths library_file_paths;
 
+void format_filename(std::string& filename) {
+  // Remove ultra-librarian prefix
+  if (filename.substr(0, 3) == "ul_") {
+    filename = filename.substr(3);
+  }
+
+  // Remove CSE prefix
+  if (filename.substr(0, 4) == "LIB_") {
+    filename = filename.substr(4);
+  }
+
+  // Replace spaces and - with _
+  std::replace(filename.begin(), filename.end(), ' ', '_');
+  std::replace(filename.begin(), filename.end(), '-', '_');
+}
+
+bool Kandle::FileHandler::save_zip(const std::string& zip_path,
+                                   std::string kandle_path) {
+  std::ifstream src(zip_path, std::ios::binary);
+
+  validate_zip_file(zip_path);
+
+  std::string filename = fs::path(zip_path).stem();
+  format_filename(filename);
+  if (kandle_path.back() != '/') {
+    kandle_path += '/';
+  }
+  kandle_path += filename + ".zip";
+
+  // Already exists skip
+  if (fs::exists(kandle_path)) {
+    std::cout << "Output directory: " << kandle_path << " already exists."
+              << std::endl;
+    return true;
+  }
+
+  std::ofstream dest(kandle_path, std::ios::binary);
+
+  // Files couldn't be loaded
+  if (!src || !dest) {
+    std::cerr << "Invalid directory: " << kandle_path << std::endl;
+    return false;
+  }
+
+  // Copy file
+  dest << src.rdbuf();
+
+  return true;
+}
+
+
 std::string Kandle::FileHandler::unzip(const std::string& path) {
 
     validate_zip_file(path);
@@ -38,19 +89,7 @@ std::string Kandle::FileHandler::unzip(const std::string& path) {
     std::string output_path = "components/extern/tmp/";
     std::string filename = fs::path(path).stem();
 
-    // Remove ultra-librarian prefix
-    if (filename.substr(0, 3) == "ul_") {
-      filename = filename.substr(3);
-    }
-
-    // Remove CSE prefix
-    if (filename.substr(0, 4) == "LIB_") {
-      filename = filename.substr(4);
-    }
-
-    // Replace spaces and - with _
-    std::replace(filename.begin(), filename.end(), ' ', '_');
-    std::replace(filename.begin(), filename.end(), '-', '_');
+    format_filename(filename);
 
     output_path += filename; // Add new filename to path
 
