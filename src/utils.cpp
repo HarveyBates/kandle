@@ -25,78 +25,90 @@
 #include "utils.hpp"
 
 /**
- * @brief Reads a file into a vector where each value 
+ * @brief Reads a file into a vector where each value
  * is a single line.
  *
- * @note Comments are ommitted (lines beginning with '#')
+ * @note Comments are omitted (lines beginning with '#')
  *
  * @param filename The path to a lib or footprint file.
  * @return Vector of strings representing individual lines.
  */
-std::vector<std::string> Utils::readlines(
-        const std::string& filename) {
+std::vector<std::string> Utils::readlines(const std::string& filename) {
+  std::vector<std::string> lines;
+  std::ifstream infile(filename, std::ios::in);
 
-    std::vector<std::string> lines;
-    std::ifstream infile(filename, std::ios::in);
-
-    if (infile.is_open()) {
-        std::string tmp;
-        while (getline(infile, tmp)) {
-            if (!tmp.empty()) {
-                if (tmp.at(0) != '#') {
-                    lines.push_back(tmp);
-                }
-            }
+  if (infile.is_open()) {
+    std::string tmp;
+    while (getline(infile, tmp)) {
+      if (!tmp.empty()) {
+        if (tmp.at(0) != '#') {
+          lines.push_back(tmp);
         }
-        infile.close();
-    } else {
-        std::cout << "File: "
-                  << filename << " not found." << std::endl;
-        exit(1);
+      }
     }
+    infile.close();
+  } else {
+    std::cout << "File: " << filename << " not found." << std::endl;
+    exit(1);
+  }
 
-    return lines;
+  return lines;
 }
 
-bool Utils::assert_true(const char c) {
-    return c == 'Y';
-}
+bool Utils::assert_true(const char c) { return c == 'Y'; }
 
-double Utils::mils_to_millimeters(int mils) {
-    return (double) mils * 0.0254;
-}
+double Utils::mils_to_millimeters(int mils) { return (double)mils * 0.0254; }
 
 std::string Utils::replace_empty_quotes(const std::string& input) {
-    std::string buf;
-    std::size_t pos = 0;
-    std::size_t prev_pos;
-    std::string empty_quotes = "\"\"";
-    std::string replacement = "\"None\"";
+  std::string buf;
+  std::size_t pos = 0;
+  std::size_t prev_pos;
+  std::string empty_quotes = "\"\"";
+  std::string replacement = "\"None\"";
 
-    buf.reserve(input.size());
+  buf.reserve(input.size());
 
-    while (true) {
-        prev_pos = pos;
-        pos = input.find(empty_quotes, pos);
-        if (pos == std::string::npos) { break; }
-        buf.append(input, prev_pos, pos - prev_pos);
-        buf.append(replacement);
-        pos += empty_quotes.size();
+  while (true) {
+    prev_pos = pos;
+    pos = input.find(empty_quotes, pos);
+    if (pos == std::string::npos) {
+      break;
     }
+    buf.append(input, prev_pos, pos - prev_pos);
+    buf.append(replacement);
+    pos += empty_quotes.size();
+  }
 
-    buf.append(input, prev_pos, input.size() - prev_pos);
+  buf.append(input, prev_pos, input.size() - prev_pos);
 
-    return buf;
+  return buf;
 }
 
 std::string Utils::split_string_nth_space(const std::string& input, int n) {
-    size_t pos = 0;
-    for (int i = 0; i < n; i++) {
-        pos = input.find(' ', pos) + 1;
-        if (pos == std::string::npos) {
-            return "";
-        }
+  size_t pos = 0;
+  for (int i = 0; i < n; i++) {
+    pos = input.find(' ', pos) + 1;
+    if (pos == std::string::npos) {
+      return "";
     }
-    return input.substr(pos);
+  }
+  return input.substr(pos);
 }
 
+std::string Utils::get_symbol_name_from_file(const std::string& line) {
+  char symbol_name[255];
+
+  // Check if symbol line
+  if (line.find("(symbol ") == std::string::npos ||
+      line.find("(in_bom") == std::string::npos) {
+    return "";
+  }
+
+  // Get symbol name
+  int res = sscanf(line.c_str(), R"( (symbol "%[^"]" ()", symbol_name);
+  if (res != 1) {
+    return "";
+  }
+
+  return symbol_name;
+}

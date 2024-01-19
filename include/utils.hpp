@@ -26,20 +26,15 @@
 
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 class Utils {
-public:
-    static std::vector<std::string> readlines(
-            const std::string& filename);
-
-    static bool assert_true(char c);
-
-    static double mils_to_millimeters(int mils);
-
-    static std::string replace_empty_quotes(const std::string& input);
-
-    static std::string split_string_nth_space(const std::string& input,
-                                              int n);
+ public:
+  static std::vector<std::string> readlines(const std::string& filename);
+  static bool assert_true(char c);
+  static double mils_to_millimeters(int mils);
+  static std::string replace_empty_quotes(const std::string& input);
+  static std::string split_string_nth_space(const std::string& input, int n);
+  static std::string get_symbol_name_from_file(const std::string& line);
 };

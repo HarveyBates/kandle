@@ -21,30 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef KANDLE_DIRECTORY_STRUCTURE_H
+#define KANDLE_DIRECTORY_STRUCTURE_H
 
-#ifndef KANDLE_FILESTRUCTURE_H
-#define KANDLE_FILESTRUCTURE_H
-
-#include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <regex>
 #include <vector>
 
+#include "tabulate.hpp"
+#include "utils.hpp"
+
 namespace Kandle {
-    class FileStructure {
+class DirectoryStructure {
+ public:
+  enum Directories {
+    DIR_COMPONENTS,
+    DIR_COMPONENTS_EXTERN,
+    DIR_SYMBOLS,
+    DIR_FOOTPRINTS,
+    DIR_3D_MODELS,
+    DIR_TEMPORARY
+  };
 
-        static bool create_directory(const std::string& relative_path,
-                                     std::size_t& n_existing);
+ private:
+  struct DirList {
+    std::string library;
+    std::vector<std::string> symbol;
+    std::vector<std::string> footprint;
+    std::vector<std::string> model_3d;
+  };
 
-    public:
-        static bool validate_directory();
+  static tabulate::Table create_table(std::vector<DirList>& dir_list);
+  static bool create_directory(const std::string& absolute_path);
+  static int list_symbols(std::vector<DirList>& dir_list);
+  static void list_footprints(std::vector<DirList>& dir_list);
+  static void list_3d_models(std::vector<DirList>& dir_list);
 
-        static bool initialise();
+ public:
+  static std::string get_directory_path(Directories dir);
+  static std::string get_absolute_directory_path(Directories dir);
+  static bool validate_working_directory();
+  static bool initialise();
+  static void list();
+};
+}  // namespace Kandle
 
-        static void list();
-    };
-} // namespace Kandle
-
-
-#endif //KANDLE_FILESTRUCTURE_H
+#endif  // KANDLE_DIRECTORY_STRUCTURE_H

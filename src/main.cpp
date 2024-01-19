@@ -22,118 +22,136 @@
  * THE SOFTWARE.
  */
 
-#include <iostream>
 #include <cxxopts.hpp>
-#include "kandle/filestructure.h"
+#include <iostream>
+
+#include "kandle/directory_structure.h"
 #include "kandle/filehandler.h"
 
 int main(int argc, char** argv) {
-    // Default options
-    cxxopts::Options options("Kandle",
-                             "KiCAD 3rd Party Component Management Tool");
+  // Default options
+  cxxopts::Options options("Kandle",
+                           "KiCAD 3rd Party Component Management Tool");
 
-    // Set args and their help information
-    options.add_options()
-            ("I,init", "Initialise a KiCAD project with Kandle.",
-             cxxopts::value<bool>())
+  // Set args and their help information
+  options.add_options()("I,init", "Initialise a KiCAD project with Kandle.",
+                        cxxopts::value<bool>())
 
-            ("L,list", "List existing component libraries.",
-             cxxopts::value<bool>())
+      ("L,list", "List existing component libraries.", cxxopts::value<bool>())
 
-            ("f,filename", "Path to zipped (.zip) component file (from "
-                           "symbol vendors).",
-             cxxopts::value<std::string>())
+          ("f,filename",
+           "Path to zipped (.zip) component file (from "
+           "symbol vendors).",
+           cxxopts::value<std::string>())
 
-            ("l,library", "Name of the library the component belongs to. "
-                          "E.g. op-amps for an LM358 IC.",
-             cxxopts::value<std::string>())
+              ("l,library",
+               "Name of the library the component belongs to. "
+               "E.g. op-amps for an LM358 IC.",
+               cxxopts::value<std::string>())
 
-            ("s,save", "Save the (.zip) file to $KANDLE_DEFAULT_DIR for quick "
-                                   "adding to future projects.",
-            cxxopts::value<bool>())
+                  ("s,save",
+                   "Save the (.zip) file to $KANDLE_DEFAULT_DIR for quick "
+                   "adding to future projects.",
+                   cxxopts::value<bool>())
 
-            ("h,help", "Display help information.");
+                      ("d,delete",
+                       "Delete a part (provide part name without extension).",
+                       cxxopts::value<std::string>())
 
-    // Get arguments from user input
-    auto result = options.parse(argc, argv);
+                          ("h,help", "Display help information.");
 
-    // Check if arg contains help (then display help information)
-    if (result.count("help")) {
-        std::cout << options.help() << std::endl;
-        exit(0);
-    }
+  // Get arguments from user input
+  auto result = options.parse(argc, argv);
 
-    // Ensure <project_name>.kicad_pro is in current directory, exit otherwise
-    Kandle::FileStructure::validate_directory();
+  // Check if arg contains help (then display help information)
+  if (result.count("help")) {
+    std::cout << options.help() << std::endl;
+    exit(0);
+  }
 
-    // Get environment variable where downloaded libraries are stored
-    const char* kandle_path = std::getenv("KANDLE_DEFAULT_PATH");
-    if (kandle_path == nullptr) {
-        std::cout << "Error locating $KANDLE_DEFAULT_PATH, insure it is defined"
-                     " in your ~/.bashrc or ~/.zshrc" << std::endl;
-    }
+  // Ensure <project_name>.kicad_pro is in current directory, exit otherwise
+  Kandle::DirectoryStructure::validate_working_directory();
 
-    // Setup Kandle directory structure, only needs to be called once on project
-    // initialisation
-    if (result.count("init")) {
-      Kandle::FileStructure::initialise();
-      exit(0);
-    }
+  // Get environment variable where downloaded libraries are stored
+  const char* kandle_path = std::getenv("KANDLE_DEFAULT_PATH");
+  if (kandle_path == nullptr) {
+    std::cout << "Error locating $KANDLE_DEFAULT_PATH, insure it is defined"
+                 " in your ~/.bashrc or ~/.zshrc"
+              << std::endl;
+  }
 
-    // List symbols in symbols directory
-    if (result.count("list")) {
-        Kandle::FileStructure::list();
-        exit(0);
-    }
+  // Setup Kandle directory structure, only needs to be called once on project
+  // initialisation
+  if (result.count("init")) {
+    Kandle::DirectoryStructure::initialise();
+    exit(0);
+  }
 
-    // Ensure user has provided the "-l" or "library" target library flag
+  // Delete a part
+  if (result.count("delete")) {
     if (!result.count("library")) {
-        std::cerr << "Library not provided. "
-                     "A valid library name must be provided "
-                     "(see kandle --help). "
-                     "Exiting."
-                  << std::endl;
-        exit(1);
+      std::cerr << "A valid library name is required to delete a part."
+                << std::endl;
+      exit(1);
     }
-
-    // Ensure user has provided the "-f" or "filename" flag
-    if (!result.count("filename")) {
-        std::cerr << "Filename not provided. "
-                     "A valid filename name must be provided "
-                     "(see kandle --help). "
-                     "Exiting."
-                  << std::endl;
-        exit(1);
-    }
-
-    // User input is valid and flags are present now preform tasks
-
-    // Get the filename name as a std::string
-    std::string zip_path = result["filename"].as<std::string>();
-
-    // Unzip the downloaded file
-    Kandle::FileHandler::unzip(zip_path);
-
-    // Save zip file for future projects
-    if (result.count("save") && kandle_path != nullptr) {
-        std::string str(kandle_path);
-        Kandle::FileHandler::save_zip(zip_path, kandle_path);
-    }
-
-    // Get the library name as a std::string
+    std::string part_name = result["delete"].as<std::string>();
     std::string library_name = result["library"].as<std::string>();
+    exit(Kandle::FileHandler::delete_part(library_name, part_name));
+  }
 
-    // For each of .kicad_sym, .kicad_footprint, and .step get their filenames
-    // (and path)
-    Kandle::FileHandler::FilePaths files =
-            Kandle::FileHandler::recursive_extract_paths(library_name);
+  // List symbols in symbols directory
+  if (result.count("list")) {
+    Kandle::DirectoryStructure::list();
+    exit(0);
+  }
 
-    // Move files from the tmp dir into their respective place and do any
-    // conversions
-    Kandle::FileHandler::import_symbol(files.symbol);
-    Kandle::FileHandler::import_footprint(files.footprint);
-    Kandle::FileHandler::import_3dmodel(files.dmodel);
+  // Ensure user has provided the "-l" or "library" target library flag
+  if (!result.count("library")) {
+    std::cerr << "Library not provided. "
+                 "A valid library name must be provided "
+                 "(see kandle --help). "
+                 "Exiting."
+              << std::endl;
+    exit(1);
+  }
 
-    return 0;
+  // Ensure user has provided the "-f" or "filename" flag
+  if (!result.count("filename")) {
+    std::cerr << "Filename not provided. "
+                 "A valid filename name must be provided "
+                 "(see kandle --help). "
+                 "Exiting."
+              << std::endl;
+    exit(1);
+  }
+
+  // User input is valid and flags are present now preform tasks
+
+  // Get the filename name as a std::string
+  std::string zip_path = result["filename"].as<std::string>();
+
+  // Unzip the downloaded file
+  Kandle::FileHandler::unzip(zip_path);
+
+  // Save zip file for future projects
+  if (result.count("save") && kandle_path != nullptr) {
+    std::string str(kandle_path);
+    Kandle::FileHandler::save_zip(zip_path, kandle_path);
+  }
+
+  // Get the library name as a std::string
+  std::string library_name = result["library"].as<std::string>();
+
+  // For each of .kicad_sym, .kicad_footprint, and .step get their filenames
+  // (and path)
+  Kandle::FileHandler::FilePaths files =
+      Kandle::FileHandler::recursive_extract_paths(library_name);
+
+  // Move files from the tmp dir into their respective place and do any
+  // conversions
+  Kandle::FileHandler::import_symbol(files.symbol);
+  Kandle::FileHandler::import_footprint(files.footprint);
+  Kandle::FileHandler::import_3dmodel(files.dmodel);
+
+  return 0;
 }
-

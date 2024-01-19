@@ -39,7 +39,7 @@ class Symbol {
     std::string output_filename;
 
     struct PinShape {
-        bool visible = false;
+        bool visible;
         std::string shape;
         char identifier;
     };
