@@ -21,52 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef KANDLE_DIRECTORY_STRUCTURE_H
-#define KANDLE_DIRECTORY_STRUCTURE_H
 
-#include <cstdlib>
+#ifndef KANDLE_KANDLE_FILE_HANDLER_H
+#define KANDLE_KANDLE_FILE_HANDLER_H
+
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <regex>
+#include <sstream>
+#include <string>
 #include <vector>
 
-#include "tabulate.hpp"
-#include "utils.hpp"
+#include "eschema/legacy.hpp"
+#include "eschema/release.hpp"
+#include "kandle/kandle_directory.h"
+#include "kandle_3d_model_hander.h"
+#include "kandle_footprint_handler.h"
+#include "kandle_symbol_handler.h"
+#include "kandle_utils.hpp"
 
 namespace Kandle {
-class DirectoryStructure {
- public:
-  enum Directories {
-    DIR_COMPONENTS,
-    DIR_COMPONENTS_EXTERN,
-    DIR_SYMBOLS,
-    DIR_FOOTPRINTS,
-    DIR_3D_MODELS,
-    DIR_TEMPORARY
-  };
+class FileHandler {
+  static bool validate_zip_file(const std::string& path);
 
- private:
-  struct DirList {
-    std::string library;
-    std::vector<std::string> symbol;
-    std::vector<std::string> footprint;
-    std::vector<std::string> model_3d;
-  };
+  static void build_library_paths(const std::string& library_name);
 
-  static tabulate::Table create_table(std::vector<DirList>& dir_list);
-  static bool create_directory(const std::string& absolute_path);
-  static int list_symbols(std::vector<DirList>& dir_list);
-  static void list_footprints(std::vector<DirList>& dir_list);
-  static void list_3d_models(std::vector<DirList>& dir_list);
+  static void format_filename(std::string& filename);
 
  public:
-  static std::string get_directory_path(Directories dir);
-  static std::string get_absolute_directory_path(Directories dir);
-  static bool validate_working_directory();
-  static bool initialise();
-  static void list();
+  struct FilePaths {
+    std::string symbol;
+    std::string footprint;
+    std::string dmodel;
+  };
+
+  static std::string unzip(const std::string& path);
+
+  static FilePaths get_tmp_file_paths(const std::string& library_name);
+
+  static bool delete_component(const std::string& library_name,
+                               const std::string& part_name);
+  static bool confirm_deletion(const std::string& library_name,
+                               const std::string& part_name);
+
+  static bool store_zip_in_global_directory(const std::string& zip_path,
+                                            std::string kandle_path);
 };
 }  // namespace Kandle
 
-#endif  // KANDLE_DIRECTORY_STRUCTURE_H
+#endif  // KANDLE_KANDLE_FILE_HANDLER_H

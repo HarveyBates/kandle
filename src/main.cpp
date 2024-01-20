@@ -25,8 +25,9 @@
 #include <cxxopts.hpp>
 #include <iostream>
 
-#include "kandle/directory_structure.h"
-#include "kandle/filehandler.h"
+#include "kandle/handlers/kandle_3d_model_hander.h"
+#include "kandle/handlers/kandle_file_handler.h"
+#include "kandle/kandle_directory.h"
 
 int main(int argc, char** argv) {
   // Default options
@@ -96,7 +97,7 @@ int main(int argc, char** argv) {
     }
     std::string part_name = result["delete"].as<std::string>();
     std::string library_name = result["library"].as<std::string>();
-    exit(Kandle::FileHandler::delete_part(library_name, part_name));
+    exit(Kandle::FileHandler::delete_component(library_name, part_name));
   }
 
   // List symbols in symbols directory
@@ -127,31 +128,32 @@ int main(int argc, char** argv) {
 
   // User input is valid and flags are present now preform tasks
 
-  // Get the filename name as a std::string
+  // Get the path of the .zip file
   std::string zip_path = result["filename"].as<std::string>();
 
-  // Unzip the downloaded file
+  // Unzip the file
   Kandle::FileHandler::unzip(zip_path);
 
-  // Save zip file for future projects
+  // Save zip file for future projects (optional)
+  // Requires global variable `KANDLE_DEFAULT_PATH` to exist
   if (result.count("save") && kandle_path != nullptr) {
     std::string str(kandle_path);
-    Kandle::FileHandler::save_zip(zip_path, kandle_path);
+    Kandle::FileHandler::store_zip_in_global_directory(zip_path, kandle_path);
   }
 
-  // Get the library name as a std::string
+  // Get the library name as a string
   std::string library_name = result["library"].as<std::string>();
 
-  // For each of .kicad_sym, .kicad_footprint, and .step get their filenames
-  // (and path)
+  // If available get the path of the symbol, footprint and 3D Model located in
+  // the tmp directory
   Kandle::FileHandler::FilePaths files =
-      Kandle::FileHandler::recursive_extract_paths(library_name);
+      Kandle::FileHandler::get_tmp_file_paths(library_name);
 
   // Move files from the tmp dir into their respective place and do any
   // conversions
-  Kandle::FileHandler::import_symbol(files.symbol);
-  Kandle::FileHandler::import_footprint(files.footprint);
-  Kandle::FileHandler::import_3dmodel(files.dmodel);
+  Kandle::SymbolHandler::add_to_project(files.symbol, library_name);
+  Kandle::FootprintHandler::add_to_project(files.footprint, library_name);
+  Kandle::Model3DHander::add_to_project(files.dmodel, library_name);
 
   return 0;
 }

@@ -21,55 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef KANDLE_KANDLE_DIRECTORY_H
+#define KANDLE_KANDLE_DIRECTORY_H
 
-#pragma once
-
-#include <cstdio>
-#include <cstring>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
-#include <iterator>
-#include <sstream>
-#include <string>
-#include <tuple>
+#include <regex>
 #include <vector>
 
-#include "eschema/component.hpp"
-#include "eschema/config.hpp"
 #include "kandle_utils.hpp"
+#include "tabulate.hpp"
 
-class Legacy {
-  static std::vector<std::tuple<int, int>> extract_polygon_coords(
-      const std::string& line, int n_coords);
-
+namespace Kandle {
+class DirectoryStructure {
  public:
-  Component::Definition def;
-  std::vector<Component::Information> info;
-  std::vector<Component::Pin> pins;
-  std::vector<Component::Rectangle> rectangles;
-  std::vector<Component::Polygon> polygons;
-  std::vector<Component::Circle> circles;
-  std::vector<Component::Arc> arcs;
-  std::vector<Component::Text> texts;
-
-  bool convert(const std::vector<std::string>& lines);
-
-  bool identify(const std::string& token, const std::string& line);
-
-  bool parse_definition(const std::string& line);
-
-  bool parse_information(const std::string& line);
-
-  bool parse_pin(const std::string& line);
-
-  bool parse_rectangle(const std::string& line);
-
-  bool parse_polygon(const std::string& line);
-
-  bool parse_circle(const std::string& line);
-
-  bool parse_arc(const std::string& line);
-
-  bool parse_text(const std::string& line);
+  enum Directories {
+    DIR_COMPONENTS,
+    DIR_COMPONENTS_EXTERN,
+    DIR_SYMBOLS,
+    DIR_FOOTPRINTS,
+    DIR_3D_MODELS,
+    DIR_TEMPORARY
+  };
 
  private:
+  struct DirList {
+    std::string library;
+    std::vector<std::string> symbol;
+    std::vector<std::string> footprint;
+    std::vector<std::string> model_3d;
+  };
+
+  static tabulate::Table create_table(std::vector<DirList>& dir_list);
+  static bool create_directory(const std::string& absolute_path);
+  static int list_symbols(std::vector<DirList>& dir_list);
+  static void list_footprints(std::vector<DirList>& dir_list);
+  static void list_3d_models(std::vector<DirList>& dir_list);
+
+ public:
+  static std::string get_directory_path(Directories dir);
+  static std::string get_absolute_directory_path(Directories dir);
+  static bool validate_working_directory();
+  static bool initialise();
+  static void list();
 };
+}  // namespace Kandle
+
+#endif  // KANDLE_KANDLE_DIRECTORY_H

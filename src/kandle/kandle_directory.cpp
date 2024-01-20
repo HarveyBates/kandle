@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include "kandle/directory_structure.h"
+#include "kandle/kandle_directory.h"
 
 namespace fs = std::filesystem;
 
@@ -34,17 +34,17 @@ namespace fs = std::filesystem;
 std::string Kandle::DirectoryStructure::get_directory_path(Directories dir) {
   switch (dir) {
     case DIR_COMPONENTS:
-      return "/components";
+      return "components";
     case DIR_COMPONENTS_EXTERN:
-      return "/components/extern";
+      return "components/extern";
     case DIR_SYMBOLS:
-      return "/components/extern/symbols";
+      return "components/extern/symbols";
     case DIR_FOOTPRINTS:
-      return "/components/extern/footprints";
+      return "components/extern/footprints";
     case DIR_3D_MODELS:
-      return "/components/extern/3dmodels";
+      return "components/extern/3dmodels";
     case DIR_TEMPORARY:
-      return "/components/extern/tmp";
+      return "components/extern/tmp";
     default:
       break;
   }
@@ -58,7 +58,7 @@ std::string Kandle::DirectoryStructure::get_absolute_directory_path(
   if (abs_path.empty()) {
     return "";
   }
-  return pwd + abs_path;
+  return pwd + "/" + abs_path;
 }
 
 /**
@@ -186,7 +186,7 @@ int Kandle::DirectoryStructure::list_symbols(std::vector<DirList>& dir_list) {
     DirList dir_item;
     dir_item.library = item.stem().string();
 
-    std::vector<std::string> lines = Utils::readlines(fs::path(dir));
+    std::vector<std::string> lines = Utils::read_lines_from_file(fs::path(dir));
 
     // Get a symbol names in a library
     for (const auto& line : lines) {

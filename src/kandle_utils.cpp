@@ -22,18 +22,21 @@
  * THE SOFTWARE.
  */
 
-#include "utils.hpp"
+#include "kandle_utils.hpp"
 
 /**
  * @brief Reads a file into a vector where each value
  * is a single line.
  *
  * @note Comments are omitted (lines beginning with '#')
+ * @warning No good for modifying unless you are going to write them out to a
+ * file later.
  *
  * @param filename The path to a lib or footprint file.
  * @return Vector of strings representing individual lines.
  */
-std::vector<std::string> Utils::readlines(const std::string& filename) {
+std::vector<std::string> Utils::read_lines_from_file(
+    const std::string& filename) {
   std::vector<std::string> lines;
   std::ifstream infile(filename, std::ios::in);
 
@@ -111,4 +114,22 @@ std::string Utils::get_symbol_name_from_file(const std::string& line) {
   }
 
   return symbol_name;
+}
+
+void Utils::copy_files_binary(const std::string& source,
+                              const std::string& dest) {
+  std::ifstream source_file(source, std::ios::binary);
+  std::ofstream dest_file(dest, std::ios::binary);
+
+  if (!source_file) {
+    std::cerr << "Unable to open file: " << source << std::endl;
+    exit(1);
+  }
+
+  if (!dest_file) {
+    std::cerr << "Unable to write to file: " << dest << std::endl;
+    exit(1);
+  }
+
+  dest_file << source_file.rdbuf();
 }
