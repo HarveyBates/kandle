@@ -38,7 +38,7 @@ static const std::vector<std::string> dirs = {
 
 bool Kandle::FileStructure::validate_directory() {
 
-    std::string path = fs::current_path();
+    std::string path = fs::current_path().string();
 
     for (const auto& dir_item: fs::directory_iterator{path}) {
         const auto item = fs::path(dir_item);
@@ -88,7 +88,7 @@ bool Kandle::FileStructure::initialise() {
 void Kandle::FileStructure::list() {
     int count = 0;
 
-    std::string path = fs::current_path();
+    std::string path = fs::current_path().string();
     path += "/components/extern/symbols";
 
     for (const auto& dir_item: fs::directory_iterator{path}) {

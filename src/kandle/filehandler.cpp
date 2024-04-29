@@ -23,6 +23,7 @@
  */
 
 #include "kandle/filehandler.h"
+#include "miniz/zip_file.hpp"
 
 namespace fs = std::filesystem;
 
@@ -36,7 +37,7 @@ std::string Kandle::FileHandler::unzip(const std::string& path) {
     std::cout << "Extracting from: " << path << std::endl;
 
     std::string output_path = "components/extern/tmp/";
-    std::string filename = fs::path(path).stem();
+    std::string filename = fs::path(path).stem().string();
 
     // Remove ultra-librarian prefix
     if (filename.substr(0, 3) == "ul_") {
@@ -63,21 +64,51 @@ std::string Kandle::FileHandler::unzip(const std::string& path) {
         return output_path;
     }
 
-    std::ostringstream oss;
-    oss << "unzip \"" << path << "\" -d \"" << output_path
-        << "\" > /dev/null 2>&1";
-    std::string cmd = oss.str();
+    try {
+        // Unzip the file using miniz library
+        mz_zip_archive zip_archive;
+        memset(&zip_archive, 0, sizeof(zip_archive));
 
-    int err = std::system(cmd.c_str());
-    if (err == 0) {
+        if (!mz_zip_reader_init_file(&zip_archive, path.c_str(), 0)) {
+            throw std::runtime_error("mz_zip_reader_init_file() failed!");
+        }
+
+        mz_uint num_files = mz_zip_reader_get_num_files(&zip_archive);
+        for (mz_uint i = 0; i < num_files; i++) {
+            if (mz_zip_reader_is_file_a_directory(&zip_archive, i)) {
+                continue; // Skip directories
+            }
+
+            mz_zip_archive_file_stat file_stat;
+            if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
+                mz_zip_reader_end(&zip_archive);
+                throw std::runtime_error("mz_zip_reader_file_stat() failed!");
+            }
+
+            const std::string full_path = output_path + "/" + file_stat.m_filename;
+            const std::string file_directory = fs::path(full_path).parent_path().string();
+
+            // Create directories if they don't exist
+            if (!fs::exists(file_directory)) {
+                fs::create_directories(file_directory);
+            }
+
+            if (!mz_zip_reader_extract_to_file(&zip_archive, i, full_path.c_str(), 0)) {
+                mz_zip_reader_end(&zip_archive);
+                throw std::runtime_error("mz_zip_reader_extract_to_file() failed!");
+            }
+        }
+
+        mz_zip_reader_end(&zip_archive);
         std::cout << "Successfully extracted to: " << output_path << std::endl;
         output_directory = output_path;
-        return output_path;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what()
+                  << " while extracting files from: " << path << std::endl;
+        exit(1);
     }
 
-    std::cerr << "Files could not be extracted from: " << path
-              << std::endl;
-    exit(1);
+    return output_path;
 }
 
 // Check that the input file path actually contains a .zip file
@@ -140,25 +171,25 @@ Kandle::FileHandler::FilePaths Kandle::FileHandler::recursive_extract_paths(
 
         if (!symbol_found && item.extension() == ".kicad_sym") {
             std::cout << "Found symbol: " << item << std::endl;
-            component_file_paths.symbol = item;
+            component_file_paths.symbol = item.string();
             symbol_found = true;
         }
 
         if (!symbol_found && item.extension() == ".lib") {
-            std::string symbol_path = item;
+            std::string symbol_path = item.string();
             component_file_paths.symbol = convert_symbol(symbol_path);
             symbol_found = true;
         }
 
         if (!footprint_found && item.extension() == ".kicad_mod") {
             std::cout << "Found footprint: " << item << std::endl;
-            component_file_paths.footprint = item;
+            component_file_paths.footprint = item.string();
             footprint_found = true;
         }
         if (!dmodel_found && (item.extension() == ".stp" ||
                               item.extension() == ".step")) {
             std::cout << "Found 3D model: " << item << std::endl;
-            component_file_paths.dmodel = item;
+            component_file_paths.dmodel = item.string();
             dmodel_found = true;
         }
     }
@@ -174,11 +205,11 @@ std::string Kandle::FileHandler::convert_symbol(
     std::string converted_path;
     std::string new_symbol_path;
 
-    converted_path = fs::path(legacy_symbol_path).parent_path();
+    converted_path = fs::path(legacy_symbol_path).parent_path().string();
     converted_path += "/";
 
     new_symbol_path = converted_path;
-    new_symbol_path += fs::path(legacy_symbol_path).stem();
+    new_symbol_path += fs::path(legacy_symbol_path).stem().string();
     new_symbol_path += ".kicad_sym";
 
     std::vector<std::string> lines = Utils::readlines(legacy_symbol_path);
@@ -201,7 +232,7 @@ std::string Kandle::FileHandler::convert_symbol(
     for (const auto& dir_item: fs::directory_iterator{converted_path}) {
         auto item = fs::path(dir_item);
         if (item.extension() == ".kicad_sym") {
-            return item;
+            return item.string();
         }
     }
 
@@ -226,9 +257,9 @@ void Kandle::FileHandler::substitute_footprint(std::string& line) {
     std::regex re(R"("Footprint" ".*")");
 
     footprint_path += R"("Footprint" ")";
-    footprint_path += fs::path(library_file_paths.symbol).stem();
+    footprint_path += fs::path(library_file_paths.symbol).stem().string();
     footprint_path += ":";
-    footprint_path += fs::path(output_directory).filename();
+    footprint_path += fs::path(output_directory).filename().string();
     footprint_path += R"(")";
 
     line = std::regex_replace(line, re, footprint_path);
@@ -281,7 +312,7 @@ bool Kandle::FileHandler::append_to_symbol_library(const std::string& path) {
             valid_library = true;
         }
 
-        if (line.find(fs::path(path).stem()) != std::string::npos) {
+        if (line.find(fs::path(path).stem().string()) != std::string::npos) {
             std::cout << "Component already exists in symbol library."
                       << std::endl;
             return true;
@@ -418,7 +449,7 @@ bool Kandle::FileHandler::import_footprint(const std::string& path) {
 
     component_path += library_file_paths.footprint;
     component_path += "/";
-    component_path += fs::path(output_directory).filename();
+    component_path += fs::path(output_directory).filename().string();
     component_path += ".kicad_mod";
 
     straight_copy(path, component_path);
@@ -466,8 +497,8 @@ bool Kandle::FileHandler::import_3dmodel(const std::string& path) {
 
     component_path += library_file_paths.dmodel;
     component_path += "/";
-    component_path += fs::path(output_directory).filename();
-    component_path += fs::path(path).extension();
+    component_path += fs::path(output_directory).filename().string();
+    component_path += fs::path(path).extension().string();
 
     straight_copy(path, component_path);
 
