@@ -15,7 +15,7 @@ from typing import List, Optional
 
 from . import project
 
-__all__ = ["ExtractedFiles", "extract_zip", "classify"]
+__all__ = ["ExtractedFiles", "extract_zip", "classify", "peek_zip"]
 
 _SYMBOL_EXTS = (".kicad_sym",)
 _LEGACY_SYMBOL_EXTS = (".lib",)
@@ -53,6 +53,48 @@ def extract_zip(zip_path: str, dest_root: str) -> str:
     with zipfile.ZipFile(zip_path) as zf:
         _safe_extract(zf, out_dir)
     return out_dir
+
+
+def _classify_names(names: List[str]) -> ExtractedFiles:
+    """Classify a list of archive member names by file type.
+
+    Shares the ordering rules used by :func:`classify` (files under a ``KiCad``
+    directory win), but operates on names only so it can be used to preview an
+    archive without extracting it.
+    """
+    result = ExtractedFiles()
+    kicad_first = [
+        n for n in names
+        if "/KiCad/" in n or n.endswith("/KiCad")
+    ]
+    ordered = kicad_first + [n for n in names if n not in kicad_first]
+    for path in ordered:
+        ext = os.path.splitext(path)[1].lower()
+        if result.symbol is None and ext in _SYMBOL_EXTS:
+            result.symbol = path
+        elif (result.symbol is None and result.legacy_symbol is None
+                and ext in _LEGACY_SYMBOL_EXTS):
+            result.legacy_symbol = path
+        elif result.footprint is None and ext in _FOOTPRINT_EXTS:
+            result.footprint = path
+        elif result.model is None and ext in _MODEL_EXTS:
+            result.model = path
+    return result
+
+
+def peek_zip(zip_path: str) -> ExtractedFiles:
+    """Classify an archive's contents without extracting it.
+
+    Best-effort preview used by the UI to show which assets an import will
+    produce.  Returns an empty :class:`ExtractedFiles` if the archive cannot be
+    read.  Zip entries always use forward slashes, so name-based classification
+    is platform independent.
+    """
+    if not os.path.isfile(zip_path) or not zipfile.is_zipfile(zip_path):
+        return ExtractedFiles()
+    with zipfile.ZipFile(zip_path) as zf:
+        names = [n for n in zf.namelist() if not n.endswith("/")]
+    return _classify_names(names)
 
 
 def _safe_extract(zf: zipfile.ZipFile, dest: str) -> None:

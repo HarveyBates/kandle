@@ -1,0 +1,49 @@
+{
+  "$schema": "https://go.kicad.org/pcm/schemas/v1",
+  "name": "Kandle - Component Manager",
+  "description": "Import and manage third-party components in KiCad.",
+  "description_full": "Kandle imports third-party symbols, footprints and 3D models (SnapEDA, Ultra Librarian, Component Search Engine) into a KiCad project. Drag a vendor .zip into the Kandle window, choose or create a component type, optionally rename the component, and Kandle sorts the symbol, footprint and 3D model into a tidy library structure, links them, registers the project library tables and refreshes KiCad. The same window doubles as a component manager for renaming and deleting imported components.",
+  "identifier": "com.github.harveybates.kandle",
+  "type": "plugin",
+  "author": {
+    "name": "Harvey Bates",
+    "contact": {
+      "web": "https://github.com/HarveyBates/kandle"
+    }
+  },
+  "maintainer": {
+    "name": "Harvey Bates",
+    "contact": {
+      "web": "https://github.com/HarveyBates/kandle"
+    }
+  },
+  "license": "MIT",
+  "resources": {
+    "homepage": "https://github.com/HarveyBates/kandle"
+  },
+  "tags": [
+    "import",
+    "symbols",
+    "footprints",
+    "models",
+    "snapeda",
+    "ultralibrarian",
+    "library-management"
+  ],
+  "versions": [
+    {
+      "version": "1.0.0",
+      "status": "stable",
+      "kicad_version": "9.0",
+      "platforms": [
+        "linux",
+        "macos",
+        "windows"
+      ],
+      "download_url": "https://github.com/HarveyBates/kandle/releases/download/v1.0.0/kandle-pcm.zip",
+      "download_sha256": "4b105ad05ecdff302ddf2e97f260c5e03e35d8814c441621fc8e4642a1d67fcc",
+      "download_size": 40623,
+      "install_size": 117470
+    }
+  ]
+}

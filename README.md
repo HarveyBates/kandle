@@ -25,7 +25,7 @@ Supported vendors:
   new one**.
 - **Rename** the component before importing.
 - Automatically sorts the symbol, footprint and 3D model into
-  `components/{symbols,footprints,3dmodels}`, links the footprint to the
+  `components/{symbols,footprints,models}`, links the footprint to the
   symbol, and converts legacy `.lib` symbols to `.kicad_sym`.
 - **Registers** the libraries in the project `sym-lib-table` / `fp-lib-table`
   and asks KiCad to refresh over the IPC API (KiCad 9+), so components appear
@@ -83,7 +83,7 @@ Imported components land in a tidy directory structure in your project:
 ```
 your_kicad_project/
 ├─ components/
-│  ├─ 3dmodels/
+│  ├─ models/
 │  ├─ footprints/
 │  ├─ symbols/
 │  ├─ .tmp/ <--- unzipped files are staged here

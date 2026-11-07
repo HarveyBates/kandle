@@ -33,7 +33,7 @@
   "versions": [
     {
       "version": "1.0.0",
-      "status": "testing",
+      "status": "stable",
       "kicad_version": "9.0",
       "platforms": [
         "linux",

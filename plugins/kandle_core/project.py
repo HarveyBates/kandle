@@ -11,6 +11,7 @@ __all__ = [
     "SYMBOLS_DIR",
     "FOOTPRINTS_DIR",
     "MODELS_DIR",
+    "MODELS_DIR_LEGACY",
     "TMP_DIR",
     "sanitize_name",
     "find_project_file",
@@ -20,7 +21,9 @@ __all__ = [
 
 SYMBOLS_DIR = "components/symbols"
 FOOTPRINTS_DIR = "components/footprints"
-MODELS_DIR = "components/3dmodels"
+MODELS_DIR = "components/models"
+# Older projects used "3dmodels"; kept for backwards compatibility.
+MODELS_DIR_LEGACY = "components/3dmodels"
 TMP_DIR = "components/.tmp"
 
 EXTERN_DIRS: List[str] = [

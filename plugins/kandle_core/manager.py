@@ -18,7 +18,18 @@ from . import legacy_converter
 from . import sexpr
 from .symbol_library import SymbolLibrary, extract_first_symbol
 
-__all__ = ["ComponentManager", "ImportResult"]
+__all__ = ["ComponentManager", "ImportResult", "ComponentInfo"]
+
+
+@dataclass
+class ComponentInfo:
+    """A single imported component and which assets exist for it."""
+
+    library: str
+    name: str
+    has_symbol: bool = True
+    has_footprint: bool = False
+    has_model: bool = False
 
 
 @dataclass
@@ -45,6 +56,11 @@ class ComponentManager:
         return os.path.join(self.project_dir, project.FOOTPRINTS_DIR)
 
     def _models_dir(self) -> str:
+        # Prefer the legacy "3dmodels" directory if an existing project still
+        # uses it; new projects use the "models" directory.
+        legacy = os.path.join(self.project_dir, project.MODELS_DIR_LEGACY)
+        if os.path.isdir(legacy):
+            return legacy
         return os.path.join(self.project_dir, project.MODELS_DIR)
 
     def _tmp_dir(self) -> str:
@@ -82,6 +98,46 @@ class ComponentManager:
         if not os.path.exists(path):
             return []
         return sorted(SymbolLibrary.load(path).symbol_names())
+
+    def component_exists(self, library: str, name: str) -> bool:
+        """Return True if a (sanitized) component name exists in a library."""
+        return project.sanitize_name(name) in self.components(library)
+
+    def all_components(self) -> List["ComponentInfo"]:
+        """Return every imported component across all libraries.
+
+        Each record notes which assets (symbol, footprint, 3D model) exist on
+        disk so the UI can present a component overview table.
+        """
+        records: List[ComponentInfo] = []
+        for lib in self.libraries():
+            fp_dir = self._footprint_lib_dir(lib)
+            fp_files = (
+                set(os.listdir(fp_dir)) if os.path.isdir(fp_dir) else set()
+            )
+            model_dir = self._model_lib_dir(lib)
+            model_stems = set()
+            if os.path.isdir(model_dir):
+                model_stems = {
+                    os.path.splitext(fn)[0] for fn in os.listdir(model_dir)
+                }
+            for name in self.components(lib):
+                records.append(ComponentInfo(
+                    library=lib,
+                    name=name,
+                    has_symbol=True,
+                    has_footprint=(name + ".kicad_mod") in fp_files,
+                    has_model=name in model_stems,
+                ))
+        return records
+
+    def peek_zip(self, zip_path: str):
+        """Preview an archive's assets without extracting it."""
+        return file_handler.peek_zip(zip_path)
+
+    def components_dir(self) -> str:
+        """Absolute path to the project's ``components`` directory."""
+        return os.path.join(self.project_dir, "components")
 
     # -- import ----------------------------------------------------------------
     def import_zip(self, zip_path: str, library: str,

@@ -45,6 +45,23 @@ def test_import_snapeda_full(kicad_project, tmp_path):
     assert os.path.exists(os.path.join(kicad_project, "fp-lib-table"))
 
 
+def test_import_uses_legacy_3dmodels_dir(kicad_project, tmp_path):
+    # A project that already has the legacy "3dmodels" directory should keep
+    # using it instead of creating a new "models" directory.
+    legacy = os.path.join(kicad_project, project.MODELS_DIR_LEGACY)
+    os.makedirs(legacy)
+
+    zip_path = make_snapeda_zip(str(tmp_path / "ESP32-WROOM.zip"))
+    mgr = _mgr(kicad_project)
+    res = mgr.import_zip(zip_path, "microcontrollers")
+    assert res.model_imported
+
+    assert os.path.exists(os.path.join(
+        legacy, "microcontrollers", "ESP32_WROOM.step"))
+    assert not os.path.exists(os.path.join(
+        kicad_project, project.MODELS_DIR, "microcontrollers"))
+
+
 def test_import_with_custom_name(kicad_project, tmp_path):
     zip_path = make_snapeda_zip(str(tmp_path / "ESP32-WROOM.zip"))
     mgr = _mgr(kicad_project)
