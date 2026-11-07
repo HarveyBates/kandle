@@ -1,4 +1,8 @@
-# Kandle (KiCad Component Handler)
+<p align="center">
+  <img src="icons/kandle_master_1024.png" alt="Kandle logo" width="200">
+</p>
+
+<h1 align="center">Kandle (KiCad Component Handler)</h1>
 
 A KiCad 9+ plugin that imports and manages third-party components (symbols,
 footprints and 3D models) from **SnapEDA**, **Ultra Librarian** and
@@ -39,6 +43,19 @@ python3 build_pcm.py kandle-pcm.zip
 In KiCad: **Plugin and Content Manager → Install from File…** → select
 `kandle-pcm.zip`. The **Kandle - Component Manager** button appears on the
 PCBnew toolbar.
+
+### Enable the KiCad API (required)
+
+Kandle communicates with KiCad over the IPC API to register libraries and
+refresh components. You must enable it before using the plugin:
+
+1. Open KiCad and go to **Preferences → Plugins** (or **Preferences →
+   Preferences → Plugins**).
+2. Tick **Enable KiCad API**.
+3. Click **OK** and restart KiCad.
+
+Without the API enabled, Kandle cannot register libraries or trigger a
+refresh, and imports will fail.
 
 ## Usage
 
