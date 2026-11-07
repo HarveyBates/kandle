@@ -31,31 +31,38 @@ Supported vendors:
   and asks KiCad to refresh over the IPC API (KiCad 9+), so components appear
   without a manual restart.
 - Acts as a **component manager**: list, rename and delete imported components.
-- 
+
 ## Install
 
-Build the archive:
+Kandle requires **KiCad 9 or newer**.
+
+Build the PCM archive from a checkout of this repository:
 
 ```bash
 python3 build_pcm.py kandle-pcm.zip
 ```
 
-In KiCad: **Plugin and Content Manager → Install from File…** → select
-`kandle-pcm.zip`. The **Kandle - Component Manager** button appears on the
-PCBnew toolbar.
+Then in KiCad:
+
+1. Open the **Plugin and Content Manager** from the KiCad project window.
+2. Click **Install from File…** and select the `kandle-pcm.zip` you built.
+3. Click **Apply Pending Changes** to finish the install.
+
+After restarting KiCad, the **Kandle - Component Manager** button appears on
+the PCBnew toolbar.
 
 ### Enable the KiCad API (required)
 
-Kandle communicates with KiCad over the IPC API to register libraries and
-refresh components. You must enable it before using the plugin:
+Kandle talks to KiCad over the IPC API (via the bundled `kipy` package) to
+register the project library tables and refresh components. The API is
+disabled by default, so you must enable it before using the plugin:
 
-1. Open KiCad and go to **Preferences → Plugins** (or **Preferences →
-   Preferences → Plugins**).
-2. Tick **Enable KiCad API**.
+1. In KiCad, open **Preferences → Preferences… → Plugins**.
+2. Tick **Enable the KiCad API / IPC server**.
 3. Click **OK** and restart KiCad.
 
-Without the API enabled, Kandle cannot register libraries or trigger a
-refresh, and imports will fail.
+Without the API enabled, Kandle cannot refresh KiCad automatically — you would
+have to reload the project or restart KiCad to see newly imported components.
 
 ## Usage
 
