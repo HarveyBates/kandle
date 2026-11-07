@@ -3,6 +3,14 @@
 *.swp
 *.*.swp
 
+# Python plugin
+__pycache__
+*.pyc
+*.pyo
+kicad_plugin/kandle-pcm.zip
+kandle-pcm.zip
+.pytest_cache
+
 # User defined directories
 build
 cmake-build

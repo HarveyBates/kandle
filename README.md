@@ -2,7 +2,13 @@
 
 ## What is it?
 
-A CLI that handles external components in a KiCad project by automatically importing them into your project symbol, footprint and 3d-model libraries.
+A tool that handles external components in a KiCad project by automatically importing them into your project symbol, footprint and 3d-model libraries.
+
+It is available in two forms:
+
+- The original **C++ CLI** (documented below).
+- A **KiCad 9+ plugin** with a drag-and-drop component-manager window, installable
+  through the Plugin & Content Manager. See [`kicad_plugin/README.md`](kicad_plugin/README.md).
 
 It supports files downloaded from several vendors such as:
 
