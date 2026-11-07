@@ -1,140 +1,115 @@
-# Kandle (KiCAD Component Handler)
+# Kandle (KiCad Component Handler)
 
-## What is it?
+A KiCad 9+ plugin that imports and manages third-party components (symbols,
+footprints and 3D models) from **SnapEDA**, **Ultra Librarian** and
+**Component Search Engine** directly inside KiCad.
 
-A tool that handles external components in a KiCad project by automatically importing them into your project symbol, footprint and 3d-model libraries.
-
-It is available in two forms:
-
-- The original **C++ CLI** (documented below).
-- A **KiCad 9+ plugin** with a drag-and-drop component-manager window, installable
-  through the Plugin & Content Manager. See [`kicad_plugin/README.md`](kicad_plugin/README.md).
-
-It supports files downloaded from several vendors such as:
-
-- [x] [SnapEDA](https://www.snapeda.com/)
-- [x] [Ultra Librarian](https://www.ultralibrarian.com/)
-- [x] [Component Search Engine](https://componentsearchengine.com/library/kicad)
-
-The CLI will:
-- [x] Handle the unzipping of files downloaded from the above providers.
-- [x] Place symbols, footprints and models in a defined directory structure.
-- [x] Convert KiCad v4 symbols (`.lib` files) to KiCad v6 symbols (`.kicad_sym` files).
-- [x] Link a symbol and footprint automatically.
-- [x] Automatically import the symbol **if a symbol library for that component exists* (same goes for the footprint)
+It installs through the **Plugin & Content Manager**, is pure Python (wxPython
+UI + an S-expression engine) and needs no external binaries.
 
 ## See it in action [here](https://www.youtube.com/watch?v=nRz4pBlJtNc/&t=120s)
 
 [![Video](https://img.youtube.com/vi/nRz4pBlJtNc/mqdefault.jpg)](https://www.youtube.com/watch?v=nRz4pBlJtNc/&t=120s)
 
-Or see an [example project](https://github.com/HarveyBates/u-nit/tree/main/electronics/u-nit/components/extern).
+Supported vendors:
 
-## Installation
+- [x] [SnapEDA](https://www.snapeda.com/)
+- [x] [Ultra Librarian](https://www.ultralibrarian.com/)
+- [x] [Component Search Engine](https://componentsearchengine.com/library/kicad)
 
-Download repository
+## Features
 
-```bash
-git clone https://github.com/HarveyBates/kandle
-cd kandle
-mkdir build
-cd build
-cmake ..
-make
-make install # (optional, if not you need to add kandle/build/bin to your path)
+- **Drag-and-drop** a vendor `.zip` into the Kandle Component Manager window
+  (launched from the PCBnew toolbar).
+- **Pick an existing component type** (library) from a dropdown, or **create a
+  new one**.
+- **Rename** the component before importing.
+- Automatically sorts the symbol, footprint and 3D model into
+  `components/{symbols,footprints,3dmodels}`, links the footprint to the
+  symbol, and converts legacy `.lib` symbols to `.kicad_sym`.
+- **Registers** the libraries in the project `sym-lib-table` / `fp-lib-table`
+  and asks KiCad to refresh over the IPC API (KiCad 9+), so components appear
+  without a manual restart.
+- Acts as a **component manager**: list, rename and delete imported components.
+
+## Layout
+
+```
+kandle/
+├─ metadata.json            # PCM package metadata (KiCad 9+)
+├─ build_pcm.py             # builds the installable PCM archive
+├─ resources/icon.png       # PCM catalogue icon
+├─ icons/                   # source artwork
+├─ plugins/
+│  ├─ __init__.py           # registers the action plugin with KiCad
+│  ├─ action_kandle.py      # pcbnew.ActionPlugin entry point
+│  ├─ icons/                # toolbar icons (travel with the code)
+│  ├─ kandle_core/          # pure-Python backend (no KiCad deps, fully tested)
+│  │  ├─ sexpr.py           # S-expression parser / pretty-printer
+│  │  ├─ legacy_converter.py# .lib -> .kicad_sym converter
+│  │  ├─ symbol_library.py  # safe add/rename/delete inside .kicad_sym
+│  │  ├─ lib_table.py       # sym-/fp-lib-table registration
+│  │  ├─ file_handler.py    # unzip + classify vendor archives
+│  │  ├─ project.py         # project discovery + directory structure
+│  │  ├─ manager.py         # high-level ComponentManager API
+│  │  └─ reload.py          # best-effort IPC reload (KiCad 9+)
+│  └─ kandle_ui/            # wxPython UI (not unit tested)
+│     └─ manager_frame.py
+└─ tests/                   # pytest suite for the backend
 ```
 
-If you want to permanently add the script to your path here is
-a [tutorial](https://appuals.com/how-to-make-a-program-executable-from-everywhere-in-linux/).
+## Install
+
+Build the archive:
+
+```bash
+python3 build_pcm.py kandle-pcm.zip
+```
+
+In KiCad: **Plugin and Content Manager → Install from File…** → select
+`kandle-pcm.zip`. The **Kandle - Component Manager** button appears on the
+PCBnew toolbar.
 
 ## Usage
 
-### Step 1
+1. Open your project in KiCad and switch to PCBnew.
+2. Click the **Kandle** toolbar button to open the Component Manager window.
+3. Drag a vendor `.zip` into the window (or use *Browse…*).
+4. Choose a component type or create a new one, optionally rename the component.
+5. Click **Import component**. KiCad refreshes and the part is ready to place.
 
-In your terminal navigate to your KiCAD project. You want to be in the same
-directory as your `.kicad_pro` file. If not you will get an error message
-saying "*KiCad project not found in current working directory. Exiting.*".
-
-### Step 2
-
-Setup (initialise) the directory structure.
-
-```bash
-kandle -I
-```
-
-This will result in a directory structure like this:
+Imported components land in a tidy directory structure in your project:
 
 ```
 your_kicad_project/
 ├─ components/
-│  ├─ extern/
-│  │  ├─ 3dmodels/
-│  │  ├─ footprints/
-│  │  ├─ symbols/
-│  │  ├─ tmp/ <--- unzipped files will be stored here
-├─ fp-info-table
-├─ sym-info-table
+│  ├─ 3dmodels/
+│  ├─ footprints/
+│  ├─ symbols/
+│  ├─ .tmp/ <--- unzipped files are staged here
 ├─ project.kicad_pcb
 ├─ project.kicad_pro
 ├─ project.kicad_sch
 ```
 
-### Step 3
+All future symbols and footprints of an existing component type appear
+automatically, with the symbol already linked to its footprint.
 
-Download a component from the supported vendors (as above). There is no need to rename the `.zip` file, unless you would like a alternative name. 
-Kandle will remove "ul_" (from Ultra-Librarian) and "LIB_" (from CSE). It will also replace all `-` or `spaces` with `_`.
+## Development / Tests
 
-> **Example:**
-> If the filename is `LIB_PESD 0402-140.zip` it will become `PESD_0402_140`.
-
-### Step 4
-
-Execute kandle passing the file you just downloaded and the library the part belongs to. 
-
-> **Example:**
-> If the part is an operational amplifier called LM358 stored in your `Downloads` directory. 
-> Your command would look like this:
-> `kandle -f Downloads/LM358.zip -l operational_amplifier`
+The backend has no KiCad or wxPython dependency and is covered by a pytest
+suite:
 
 ```bash
-kandle -f <your_download_file_name>.zip -l <library_name>
+python3 -m pytest tests/ -q
 ```
-### Step 5
-Open Eeschema -> Preferences -> Manage Symbol Libraries -> Project Specific Libraries -> Add existing.
 
-Using the above example, you would import the file `components/extern/symbols/operational_amplifier.kicad_sym`.
-
-### Step 6
-Open PCBnew -> Preferences -> Manage Footprint Libraries -> Add existing. 
-
-Using the above example, you would import the file `components/extern/footprints/operational_amplifier.pretty`.
-
-> **Attention**
-> Kandle will automatically change default text size of footprint names to 1 with a thickness of 0.15 (KiCAD defaults).
-
-### Step 7 
-Place on your Eeschema schematic. In the above example, you would search for `operational_amplifier` and then select LM358. The symbol should already be linked to the footprint. 
-
-All future symbols and footprints of type `operational_amplifier` will appear automatically so there is no need to repeat *Step 5* again!
-
-## Help
-
-```
-KiCAD 3rd Party Component Management Tool
-Usage:
-  kandle [OPTION...]
-
-  -I, --init          Initialise a KiCAD project with Kandle.
-  -L, --list          List existing component libraries.
-  -f, --filename arg  Path to zipped (.zip) component file.
-  -l, --library arg   Name of the library the component belongs to.
-  -h, --help          Help information.
-```
+The UI layer (`kandle_ui`) and the action-plugin entry point require wxPython
+and a running KiCad, so they are not unit tested.
 
 ## Found a problem
 
-Submit
-an [issue](https://github.com/HarveyBates/kicad-component-handler/issues) with:
+Submit an [issue](https://github.com/HarveyBates/kandle/issues) with:
 
 1. A link to the component (if the issue is related to a component you are
    trying to import).
@@ -143,4 +118,3 @@ an [issue](https://github.com/HarveyBates/kicad-component-handler/issues) with:
 ## License
 
 This project is MIT licensed, as found in the LICENCE file.
-

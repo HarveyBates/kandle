@@ -11,7 +11,7 @@ Format::
     (sym_lib_table
       (version 7)
       (lib (name "op_amps")(type "KiCad")
-           (uri "${KIPRJMOD}/components/extern/symbols/op_amps.kicad_sym")
+           (uri "${KIPRJMOD}/components/symbols/op_amps.kicad_sym")
            (options "")(descr ""))
     )
 """

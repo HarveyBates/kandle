@@ -12,27 +12,23 @@ __all__ = [
     "FOOTPRINTS_DIR",
     "MODELS_DIR",
     "TMP_DIR",
-    "RESOURCES_DIR",
     "sanitize_name",
     "find_project_file",
     "is_kicad_project",
     "initialise",
 ]
 
-SYMBOLS_DIR = "components/extern/symbols"
-FOOTPRINTS_DIR = "components/extern/footprints"
-MODELS_DIR = "components/extern/3dmodels"
-TMP_DIR = "components/extern/tmp"
-RESOURCES_DIR = "components/extern/resources"
+SYMBOLS_DIR = "components/symbols"
+FOOTPRINTS_DIR = "components/footprints"
+MODELS_DIR = "components/3dmodels"
+TMP_DIR = "components/.tmp"
 
 EXTERN_DIRS: List[str] = [
     "components",
-    "components/extern",
     SYMBOLS_DIR,
     FOOTPRINTS_DIR,
     MODELS_DIR,
     TMP_DIR,
-    RESOURCES_DIR,
 ]
 
 

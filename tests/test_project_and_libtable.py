@@ -32,24 +32,24 @@ def test_initialise_creates_dirs(kicad_project):
 def test_register_symbol_lib(kicad_project):
     added = lib_table.register_symbol_lib(
         kicad_project, "op_amps",
-        "components/extern/symbols/op_amps.kicad_sym",
+        "components/symbols/op_amps.kicad_sym",
     )
     assert added is True
     path = os.path.join(kicad_project, "sym-lib-table")
     text = open(path).read()
     assert "op_amps" in text
-    assert "${KIPRJMOD}/components/extern/symbols/op_amps.kicad_sym" in text
+    assert "${KIPRJMOD}/components/symbols/op_amps.kicad_sym" in text
     # Idempotent.
     assert lib_table.register_symbol_lib(
         kicad_project, "op_amps",
-        "components/extern/symbols/op_amps.kicad_sym",
+        "components/symbols/op_amps.kicad_sym",
     ) is False
 
 
 def test_register_footprint_lib(kicad_project):
     assert lib_table.register_footprint_lib(
         kicad_project, "op_amps",
-        "components/extern/footprints/op_amps.pretty",
+        "components/footprints/op_amps.pretty",
     )
     text = open(os.path.join(kicad_project, "fp-lib-table")).read()
     assert "op_amps.pretty" in text
@@ -58,9 +58,9 @@ def test_register_footprint_lib(kicad_project):
 def test_lib_table_remove(kicad_project):
     path = os.path.join(kicad_project, "sym-lib-table")
     lib_table.register_symbol_lib(
-        kicad_project, "a", "components/extern/symbols/a.kicad_sym")
+        kicad_project, "a", "components/symbols/a.kicad_sym")
     lib_table.register_symbol_lib(
-        kicad_project, "b", "components/extern/symbols/b.kicad_sym")
+        kicad_project, "b", "components/symbols/b.kicad_sym")
     table = lib_table.LibTable.load_or_empty(path, "sym_lib_table")
     assert set(table.lib_names()) == {"a", "b"}
     assert table.remove_lib("a") is True
