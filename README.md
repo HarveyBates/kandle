@@ -7,10 +7,6 @@ footprints and 3D models) from **SnapEDA**, **Ultra Librarian** and
 It installs through the **Plugin & Content Manager**, is pure Python (wxPython
 UI + an S-expression engine) and needs no external binaries.
 
-## See it in action [here](https://www.youtube.com/watch?v=nRz4pBlJtNc/&t=120s)
-
-[![Video](https://img.youtube.com/vi/nRz4pBlJtNc/mqdefault.jpg)](https://www.youtube.com/watch?v=nRz4pBlJtNc/&t=120s)
-
 Supported vendors:
 
 - [x] [SnapEDA](https://www.snapeda.com/)
@@ -31,33 +27,7 @@ Supported vendors:
   and asks KiCad to refresh over the IPC API (KiCad 9+), so components appear
   without a manual restart.
 - Acts as a **component manager**: list, rename and delete imported components.
-
-## Layout
-
-```
-kandle/
-├─ metadata.json            # PCM package metadata (KiCad 9+)
-├─ build_pcm.py             # builds the installable PCM archive
-├─ resources/icon.png       # PCM catalogue icon
-├─ icons/                   # source artwork
-├─ plugins/
-│  ├─ __init__.py           # registers the action plugin with KiCad
-│  ├─ action_kandle.py      # pcbnew.ActionPlugin entry point
-│  ├─ icons/                # toolbar icons (travel with the code)
-│  ├─ kandle_core/          # pure-Python backend (no KiCad deps, fully tested)
-│  │  ├─ sexpr.py           # S-expression parser / pretty-printer
-│  │  ├─ legacy_converter.py# .lib -> .kicad_sym converter
-│  │  ├─ symbol_library.py  # safe add/rename/delete inside .kicad_sym
-│  │  ├─ lib_table.py       # sym-/fp-lib-table registration
-│  │  ├─ file_handler.py    # unzip + classify vendor archives
-│  │  ├─ project.py         # project discovery + directory structure
-│  │  ├─ manager.py         # high-level ComponentManager API
-│  │  └─ reload.py          # best-effort IPC reload (KiCad 9+)
-│  └─ kandle_ui/            # wxPython UI (not unit tested)
-│     └─ manager_frame.py
-└─ tests/                   # pytest suite for the backend
-```
-
+- 
 ## Install
 
 Build the archive:
@@ -86,7 +56,7 @@ your_kicad_project/
 │  ├─ models/
 │  ├─ footprints/
 │  ├─ symbols/
-│  ├─ .tmp/ <--- unzipped files are staged here
+│  ├─ .tmp/
 ├─ project.kicad_pcb
 ├─ project.kicad_pro
 ├─ project.kicad_sch
